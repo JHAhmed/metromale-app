@@ -1,0 +1,18 @@
+{
+	"appId": "com.metromaleclinic.metromale",
+	"appName": "Metromale",
+	"webDir": "build",
+	"server": {
+		"androidScheme": "https"
+	},
+	"plugins": {
+		"App": {
+			"scheme": "com.metromaleclinic.metromale"
+		},
+		"StatusBar": {
+			"overlaysWebView": false,
+			"style": "LIGHT",
+			"backgroundColor": "#ffffffff"
+		}
+	}
+}
