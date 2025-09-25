@@ -41,6 +41,9 @@
 			<div class="flex h-36 w-full flex-col items-center justify-center space-y-6">
 				<Icon icon="ph:asclepius" class="size-8 text-white" />
 				<h2 class="text-center font-medium text-white">Book Appointment</h2>
+
+
+				
 			</div>
 		</div>
 	</div>
@@ -74,6 +77,18 @@
 		</a>
 	</div> -->
 
+	<a
+		href="/podcasts/latest"
+		class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]"
+	>
+		<div class="flex items-center space-x-4">
+			<Icon icon="ph:headphones" class="size-8 text-amber-500" />
+			<div class="flex flex-col">
+				<h3 class="font-medium text-gray-700">Podcast: Healthy Habits Q & A</h3>
+				<p class="text-xs text-gray-500">18-min episode • New</p>
+			</div>
+		</div>
+	</a>
 
 	<a
 		href="/podcasts/latest"
@@ -88,16 +103,4 @@
 		</div>
 	</a>
 
-	<a
-		href="/podcasts/latest"
-		class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]"
-	>
-		<div class="flex items-center space-x-4">
-			<Icon icon="ph:headphones" class="size-8 text-amber-500" />
-			<div class="flex flex-col">
-				<h3 class="font-medium text-gray-700">Podcast: Healthy Habits Q & A</h3>
-				<p class="text-xs text-gray-500">18-min episode • New</p>
-			</div>
-		</div>
-	</a>
 </div>

@@ -1,42 +1,39 @@
-
 <script>
 	import '../app.css';
 	import { page } from '$app/state';
 	import favicon from '$lib/assets/favicon.svg';
 	import { onMount } from 'svelte';
-	import { afterNavigate, goto } from '$app/navigation';
-	import { isAuthenticated, loadAuth, user } from '$lib/stores/auth.svelte.js';
-	import { Capacitor } from '@capacitor/core';
-	import { StatusBar, Style } from '@capacitor/status-bar';
-	import Modal from '$lib/shared/Modal.svelte';
+	import { isAuthenticated, user } from '$lib/stores/auth.svelte.js';
 
+	import Modal from '$lib/shared/Modal.svelte';
 	import Navbar from '$lib/shared/Navbar.svelte';
 	import TopNavbar from '$lib/shared/TopNavbar.svelte';
+	import { App } from '@capacitor/app';
 
 	let { children, data } = $props();
 	let name = $state('User');
 	const publicRoutes = ['/auth/login', '/'];
-	onMount(async () => {
-		// if (Capacitor.isNativePlatform()) {
-		// 	await StatusBar.setOverlaysWebView({ overlay: false });
-		// 	await StatusBar.setBackgroundColor({ color: '#ffffff' });
-		// 	await StatusBar.setStyle({ style: Style.Light });
-		// }
 
-		// await loadAuth();
 
-		name = user.user.given_name;
 
-		// if (!isAuthenticated.isAuthenticated) {
-		// 	goto('/auth/login');
-		// }
+	// onMount(() => {
+	// 	App.addListener('appUrlOpen', async ({ url }) => {
+	// 		// Only handle the app’s scheme
+	// 		if (!url?.startsWith('com.metromaleclinic.metromale://')) return;
 
-		// afterNavigate(async () => {
-		// 	if (!isAuthenticated.isAuthenticated) {
-		// 		goto('/auth/login');
-		// 	}
-		// });
-	});
+	// 		name = user.user?.given_name || 'User';
+
+
+	// 		// Move code & state into the WebView’s URL so the Kinde client can see them
+	// 		const deep = new URL(url);
+	// 		const current = new URL(window.location.href);
+	// 		// Place all query params (code, state, etc.) onto the current URL
+	// 		current.search = deep.search;
+	// 		// Navigate so @kinde-oss/kinde-auth-pkce-js can detect and finish the flow
+	// 		window.location.assign(current.toString());
+	// 	});
+	// });
+
 </script>
 
 <svelte:head>
@@ -48,16 +45,12 @@
 >
 	<TopNavbar {name} isAuth={isAuthenticated.isAuthenticated} />
 	{#if !isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)}
-		<!-- Show nothing or a loading spinner while checking authentication -->
-
-	<Modal />
+		<Modal />
 	{:else}
 		<div class="body no-scrollbar scrollbar-hidden h-full w-full">{@render children?.()}</div>
 	{/if}
 	<Navbar />
 </div>
-
-<!-- {/if} -->
 
 <style>
 	.body {

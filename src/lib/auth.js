@@ -1,28 +1,33 @@
 import createKindeClient from '@kinde-oss/kinde-auth-pkce-js';
 import { Capacitor } from '@capacitor/core';
 
-const isMobile = Capacitor.isNativePlatform();
 let kinde;
-
-// Will this work?
-const redirectUri = isMobile
-	? `com.metromaleclinic.metromale://wurks.kinde.com/kinde_callback`
-	: window.location.origin;
-
-const logoutUri = isMobile
-	? `com.metromaleclinic.metromale://wurks.kinde.com/kinde_logoutcallback`
-	: window.location.origin;
-
 
 export async function initKinde() {
 	if (!kinde) {
+
+		const isMobile = Capacitor.isNativePlatform();
+
+		const redirectUri = isMobile
+			? `com.metromaleclinic.metromale://kinde_callback`
+			: window.location.origin;
+
+		const logoutUri = isMobile
+			? `com.metromaleclinic.metromale://kinde_logoutcallback`
+			: window.location.origin;
+
 		kinde = await createKindeClient({
-			client_id: '4c66c650a3d04088bd821c2192791ffe', // From Kinde
-			domain: 'https://wurks.kinde.com',
+			client_id: '6aeb90ef7412451791fa455a151da3aa', // From Kinde
+			domain: 'https://metromale.kinde.com',
+			
 			redirect_uri: redirectUri,
 			logout_uri: logoutUri,
 			scope: 'openid profile email offline',
-			is_dangerously_use_local_storage: true // Dev only! Use custom domains in prod for secure cookies! TODO - What does this mean?
+			is_dangerously_use_local_storage: true, 
+			on_redirect_callback: (appState) => {
+				const target = appState?.targetUrl ?? '/';
+				window.location.replace(target);
+			}
 		});
 	}
 

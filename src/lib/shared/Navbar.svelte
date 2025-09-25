@@ -34,7 +34,7 @@
 </script>
 
 <!-- <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white"> -->
-<nav class="fixed rounded-2xl mx-2 my-2 inset-x-0 bottom-0 z-50 border-gray-200 bg-white/80 backdrop-blur-xs shadow-2xl/5">
+<nav class="fixed rounded-2xl mx-2 my-2 inset-x-0 bottom-0 z-10 border-gray-200 bg-white/80 backdrop-blur-xs shadow-2xl/5">
 	<div class="mx-auto flex h-16 max-w-md">
 		{#each navItems as item}
 			<a href={item.href} class="flex flex-1 flex-col items-center justify-center text-center">

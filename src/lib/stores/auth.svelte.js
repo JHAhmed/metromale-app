@@ -12,5 +12,4 @@ export async function loadAuth() {
     if (isAuthenticated.isAuthenticated) {
         user.user = await client.getUser();
     }
-
 }

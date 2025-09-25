@@ -9,6 +9,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <meta-data
+            android:name="au.kinde.domain"
+            android:value="https://metromale.kinde.com" />
+
+        <meta-data
+            android:name="au.kinde.clientId"
+            android:value="6aeb90ef7412451791fa455a151da3aa" />
+
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
             android:name=".MainActivity"
@@ -22,28 +31,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Deep link: login callback -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                android:scheme="com.metromaleclinic.metromale"
-                android:host="wurks.kinde.com"
-                android:path="/kinde_callback" />
+                <data android:scheme="com.metromaleclinic.metromale" android:host="kinde_callback" />
+                <data android:scheme="com.metromaleclinic.metromale" android:host="kinde_logoutcallback" />
             </intent-filter>
-
-            <!-- Deep link: logout callback (optional) -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                android:scheme="com.metromaleclinic.metromale"
-                android:host="wurks.kinde.com"
-                android:path="/kinde_logoutcallback" />
-            </intent-filter>
-
 
         </activity>
 

@@ -3,8 +3,6 @@
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
 	import Icon from '@iconify/svelte';
 
-	console.log(user.user);
-
 	async function handleLogout() {
 		try {
 			await logout();
@@ -50,7 +48,7 @@
 
 		<!-- Menu Card -->
 		<div class="rounded-2xl bg-white/60 p-1 shadow backdrop-blur-lg">
-			<ul>
+			<ul class="space-y-1">
 				{#each menu as item (item.label)}
 					<li>
 						<a

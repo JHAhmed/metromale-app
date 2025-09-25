@@ -3,19 +3,21 @@
 	import { page } from '$app/stores';
 	import { fade, slide } from 'svelte/transition';
 	import { kindeClient } from '$lib/stores/auth.svelte';
+	import { Browser } from '@capacitor/browser';
 
 	let { name = 'User', isAuth = false } = $props();
 
 	let menuOpen = $state(false);
 
-	function openNotifications() {
-		menuOpen = !menuOpen;
-		console.log('Notifications clicked');
+	async function handleLogin () {
+		// const authUrl = await kindeClient.client.login();  // Or kinde.register() for sign-up
+		// await Browser.open({ url: kindeClient.client. });  // Open in system browser
+		// login();
 	}
 
-	// const navItems = [
-	// 	{ onclick: openNotifications, label: 'Notifications', icon: 'ph:bell-simple' },
-	// ];
+	function openNotifications() {
+		menuOpen = !menuOpen;
+	}
 </script>
 
 <nav
@@ -34,7 +36,7 @@
 
 		{#if !isAuth}
 			<button
-				onclick={() => (kindeClient.client.login())}
+				onclick={handleLogin}
 				class="ml-4 inline-flex h-11 items-center justify-center rounded-full bg-yellow-400 px-4 text-sm font-semibold text-black shadow-sm hover:bg-yellow-300 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:outline-none"
 			>
 				Login
