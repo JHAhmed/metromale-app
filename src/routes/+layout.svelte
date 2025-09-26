@@ -11,6 +11,7 @@
 
 	import { account } from '$lib/appwrite';
 	import { goto } from '$app/navigation';
+	import { fade } from 'svelte/transition';
 
 	let { children, data } = $props();
 	
@@ -38,7 +39,7 @@
 </svelte:head>
 
 <div
-	class="no-scrollbar scrollbar-hidden h-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100"
+	class="no-scrollbar scrollbar-hidden h-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 md:max-w-md"
 >
 	{#key name}
 		<TopNavbar {name} isAuth={isAuthenticated.isAuthenticated} />
@@ -47,7 +48,14 @@
 	{#if !isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)}
 		<Modal />
 	{:else}
-		<div class="body no-scrollbar scrollbar-hidden h-full w-full">{@render children?.()}</div>
+
+	{#key page.url.pathname}
+		<div in:fade={{ duration: 150, delay: 150 }} out:fade={{ duration: 150 }} class="body no-scrollbar scrollbar-hidden h-full w-full">
+			{@render children?.()}
+		</div>
+	{/key}
+
+
 	{/if}
 
 	{#if page.url.pathname !== '/auth/login'}
@@ -60,7 +68,9 @@
 	.body {
 		-ms-overflow-style: none; /* Internet Explorer 10+ */
 		scrollbar-width: none; /* Firefox, Safari 18.2+, Chromium 121+ */
+		scrollbar-gutter: stable;
 	}
+
 	.body::-webkit-scrollbar {
 		display: none; /* Older Safari and Chromium */
 	}

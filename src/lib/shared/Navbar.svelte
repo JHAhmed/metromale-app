@@ -37,7 +37,7 @@
 <nav class="fixed rounded-2xl mx-2 my-2 inset-x-0 bottom-0 z-10 border-gray-200 bg-white/80 backdrop-blur-xs shadow-2xl/5">
 	<div class="mx-auto flex h-16 max-w-md">
 		{#each navItems as item}
-			<a href={item.href} class="flex flex-1 flex-col items-center justify-center text-center">
+			<a href={item.href} class="flex flex-1 flex-col items-center justify-center text-center active:scale-95 active:opacity-80 transition-transform py-2">
 				<Icon
 					icon={activeHref === item.href ? item.iconFilled : item.icon}
 					class="h-6 w-6 {activeHref === item.href ? 'text-primary' : 'text-gray-600'}"

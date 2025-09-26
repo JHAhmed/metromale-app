@@ -2,8 +2,6 @@
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/state';
 	import { fade, slide } from 'svelte/transition';
-	// import { kindeClient } from '$lib/stores/auth.svelte';
-	import { Browser } from '@capacitor/browser';
 	import { goto } from '$app/navigation';
 
 	let { name = 'User', isAuth = false } = $props();
@@ -28,7 +26,7 @@
 	<div class="mx-auto flex h-16 items-center justify-end">
 		<button
 			onclick={openNotifications}
-			class="flex h-fit w-fit flex-1 flex-col items-center justify-center rounded-full bg-gray-100 p-3 text-center text-black"
+			class="flex h-fit w-fit flex-1 flex-col items-center justify-center rounded-full bg-gray-100 p-3 text-center text-black active:scale-95 active:opacity-80 transition-transform"
 		>
 			<Icon icon="ph:bell-simple" class="h-6 w-6" />
 		</button>
@@ -36,7 +34,7 @@
 		{#if !isAuth}
 			<button
 				onclick={handleLogin}
-				class="ml-4 inline-flex h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:bg-orange-300 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none"
+				class="ml-4 inline-flex h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:bg-orange-400 active:scale-95 active:opacity-80 transition-transform"
 			>
 				Login
 				<Icon icon="ph:sign-in" class="ml-2 h-5 w-5" />

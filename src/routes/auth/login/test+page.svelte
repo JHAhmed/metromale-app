@@ -1,54 +1,68 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { text } from '@sveltejs/kit';
-
 	import logo from '$lib/assets/logo.svg';
 	import { account } from '$lib/appwrite';
 	import Modal from '$lib/shared/Modal.svelte';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
-
 	import Icon from '@iconify/svelte';
 
 	let loading = $state(false);
 	let isRegistering = $state(false);
+	let showOtpInput = $state(false); // New: Toggle OTP field visibility
 
-	let name = $state('');
-	let email = $state('');
-	let password = $state('');
+	let name = $state(''); // Optional for "signup"
+	let phone = $state(''); // e.g., '+919876543210'
+	let otp = $state(''); // The 6-digit OTP from SMS
 	let error = $state('');
+	let tempUserId = $state(''); // Store userId from createPhoneToken
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-
 		loading = true;
-
 		error = '';
-		if (isRegistering) {
-			await signup();
+
+		if (!showOtpInput) {
+			// Step 1: Send OTP
+			await sendOtp();
 		} else {
-			await login();
+			// Step 2: Verify OTP and create session
+			await verifyOtp();
 		}
 	}
 
-	async function signup() {
+	async function sendOtp() {
 		try {
-			await account.create('unique()', email, password, name);
-			await login();
+			const token = await account.createPhoneToken('unique()', phone);
+			console.log('OTP sent to phone:', phone, token);
+			tempUserId = token.userId; // Store for verification
+			showOtpInput = true; // Show OTP input
 		} catch (e) {
 			error = e.message;
+			console.error('Error sending OTP:', e);
+		} finally {
+			loading = false;
 		}
 	}
 
-	async function login() {
+	async function verifyOtp() {
 		try {
-			await account.createEmailPasswordSession(email, password);
+			await account.createSession(tempUserId, otp);
 			isAuthenticated.isAuthenticated = true;
 			const userData = await account.get();
+
+			// If registering, update name (optional)
+			if (isRegistering && name) {
+				await account.updateName(name);
+				userData.name = name; // Update local user data
+			}
+
 			user.user = userData;
 			goto('/');
-			loading = false;
 		} catch (e) {
 			error = e.message;
+		} finally {
+			loading = false;
+			showOtpInput = false; // Reset for next time
 		}
 	}
 
@@ -63,6 +77,28 @@
 		}
 	}
 </script>
+
+<!-- <form onsubmit={handleSubmit}>
+	{#if isRegistering}
+		<input type="text" bind:value={name} placeholder="Name" />
+	{/if}
+	<input type="tel" bind:value={phone} placeholder="Phone Number (e.g., +919876543210)" />
+
+	{#if showOtpInput}
+		<input type="text" bind:value={otp} placeholder="Enter OTP" maxlength="6" />
+	{/if}
+
+	<button type="submit" disabled={loading}>
+		{loading ? 'Loading...' : showOtpInput ? 'Verify OTP' : isRegistering ? 'Register' : 'Login'}
+	</button>
+	{#if error}
+		<p>{error}</p>
+	{/if}
+</form>
+
+<button onclick={() => (isRegistering = !isRegistering)}>
+	{isRegistering ? 'Switch to Login' : 'Switch to Register'}
+</button> -->
 
 {#if loading}
 	<Modal text="Logging in..." />
@@ -108,7 +144,7 @@
 								type="text"
 								id="name"
 								bind:value={name}
-								required
+								requiorange
 								placeholder="Full Name"
 								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
 							/>
@@ -116,26 +152,50 @@
 					</div>
 				{/if}
 
-				<!-- Email Field -->
+				<!-- Phone Field -->
 				<div>
-					<label for="email" class="sr-only block text-sm font-medium text-gray-700">Email</label>
+					<label for="phone" class="sr-only block text-sm font-medium text-gray-700">Phone</label>
 					<div class="relative">
 						<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-							<Icon icon="ph:envelope-simple" class="size-5 text-gray-400" />
+							<Icon icon="ph:phone" class="size-5 text-gray-400" />
 						</span>
 						<input
-							type="email"
-							id="email"
-							bind:value={email}
+							type="tel"
+							id="phone"
+							bind:value={phone}
 							required
-							placeholder="Email address"
+							placeholder="Phone Number (e.g., +919876543210)"
 							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
 						/>
 					</div>
 				</div>
 
-				<!-- Password Field -->
+				{#if showOtpInput}
+
+
 				<div>
+					<label for="otp" class="sr-only block text-sm font-medium text-gray-700">OTP</label>
+					<div class="relative">
+						<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+							<Icon icon="ph:lock" class="size-5 text-gray-400" />
+						</span>
+						<input
+							type="tel"
+							id="otp"
+							bind:value={otp}
+							required
+							maxlength={6}
+							placeholder="Enter OTP"
+							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
+						/>
+					</div>
+				</div>
+
+					<!-- <input class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" type="text" bind:value={otp} placeholder="Enter OTP" maxlength="6" /> -->
+				{/if}
+
+				<!-- Password Field -->
+				<!-- <div>
 					<label for="password" class="sr-only block text-sm font-medium text-gray-700"
 						>Password</label
 					>
@@ -152,18 +212,19 @@
 							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
 						/>
 					</div>
-				</div>
+				</div> -->
 
 				<!-- Submit Button -->
 				<button
 					type="submit"
 					class="w-full rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white shadow-sm transition-transform hover:scale-[1.02] hover:bg-orange-500 focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:outline-none"
 				>
-					{#if isRegistering}
+				{loading ? 'Loading...' : showOtpInput ? 'Verify OTP' : isRegistering ? 'Register' : 'Login'}
+				<!-- {#if isRegistering}
 						Create Account
 					{:else}
 						Sign In
-					{/if}
+					{/if} -->
 				</button>
 			</form>
 

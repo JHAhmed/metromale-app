@@ -52,7 +52,7 @@
 					<li>
 						<a
 							href="#"
-							class="group flex items-center rounded-xl px-5 py-4 transition-all hover:bg-sky-50"
+							class="group flex items-center rounded-xl px-5 py-4 transition-all hover:bg-sky-50 active:scale-[98%] active:bg-sky-100"
 						>
 							<Icon
 								icon={item.icon}
@@ -73,7 +73,7 @@
 				<li>
 					<button
 						onclick={handleLogout}
-						class="group w-full flex justify-start items-center text-left rounded-xl bg-red-200 px-5 py-4 transition-all hover:bg-red-300"
+						class="group w-full flex justify-start items-center text-left rounded-xl bg-red-200 px-5 py-4 transition-all hover:bg-red-300 active:scale-[98%] active:bg-red-400"
 					>
 						<Icon icon="mdi:logout" class={'mr-4 size-5 text-red-400 group-hover:text-red-500 '} />
 						<span class="flex-1 text-base font-medium text-gray-900">Logout</span>

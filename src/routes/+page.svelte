@@ -4,12 +4,12 @@
 </script>
 
 <div class="space-y-4 p-4 md:p-6">
-	<h1 class="text-lg font-medium text-center text-gray-800">Dashboard</h1>
+	<h1 class="text-lg font-medium text-center text-gray-700">Dashboard</h1>
 
 	<div
 		class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1"
 	>
-		<div class="flex h-36 w-full flex-col items-center justify-center space-y-6">
+		<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
 			<Icon icon="ph:stethoscope" class="size-8 text-gray-400" />
 			<h2 class="text-center font-medium text-gray-700">
                 {isAuthenticated.isAuthenticated ? 'No Upcoming Appointments' : 'Login to view Appointments'}
@@ -37,7 +37,10 @@
 				<Icon icon="ph:asclepius" class="size-8 text-white" />
 				<h2 class="text-center font-medium text-white">Book Appointment</h2>
 
-
+				<!-- <button class="mx-auto mt-auto items-center justify-center text-white inline-flex rounded-full">
+					<Icon icon="ph:plus" class="size-8 rounded-full p-0.5 bg-white/50" />
+					<span class="sr-only">Add Appointment</span>
+				</button> -->
 				
 			</div>
 		</div>
@@ -46,7 +49,7 @@
 
 <!-- ─── Latest From Dr. Karthik ────────────────────────────────────────────── -->
 <div class="space-y-4 p-4 md:p-6">
-	<h2 class="text-lg font-medium text-center text-gray-800">Latest from Dr. Karthik Gunasekaran</h2>
+	<h2 class="text-lg font-medium text-center text-gray-700">Latest from Dr. Karthik Gunasekaran</h2>
 
 	<a
 		href="/podcasts/latest"
