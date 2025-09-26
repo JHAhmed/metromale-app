@@ -1,26 +1,16 @@
 export const prerender = true;
 export const ssr = false;
 
-import { initKinde } from '$lib/auth';
-import { isLoading, isAuthenticated, user, kindeClient } from '$lib/stores/auth.svelte.js';
 import { goto } from '$app/navigation';
+import { account } from '$lib/appwrite.js';
+import { isAuthenticated, user } from '$lib/stores/auth.svelte.js';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { App } from '@capacitor/app';
 
 let isNativeReady = false;
-
-// App.addListener('appUrlOpen', async ({ url }) => {
-//     if (!url?.startsWith('com.metromaleclinic.metromale://')) return;
-
-//     const deep = new URL(url);
-//     const current = new URL(window.location.href);
-//     current.search = deep.search;
-//     window.location.assign(current.toString());
-// });
+const publicRoutes = ['/', '/auth/login', '/auth/register', '/about'];
 
 export async function load({ url }) {
-	isLoading.isLoading = true;
 
 	if (Capacitor.isNativePlatform() && !isNativeReady) {
 		await StatusBar.setOverlaysWebView({ overlay: false });
@@ -29,34 +19,36 @@ export async function load({ url }) {
 		isNativeReady = true;
 	}
 
+	let appwriteUser = null;
+
 	try {
-		const kinde = await initKinde();
-		const isAuth = await kinde.isAuthenticated();
+		try {
+			appwriteUser = await account.get();
+		} catch (error) {
+			console.error('Error fetching user:', error);
+		}
+
+		const isAuth = !!appwriteUser?.$id;
 
 		isAuthenticated.isAuthenticated = isAuth;
-		kindeClient.client = kinde;
 
 		if (isAuth) {
-			user.user = await kinde.getUserProfile();
+			user.user = appwriteUser;
 		} else {
 			user.user = null;
-
-			const publicRoutes = ['/'];
-
 			if (!publicRoutes.includes(url.pathname)) {
-				kindeClient.client.login();
+				goto('/auth/login');
 				return {};
 			}
 		}
 	} catch (e) {
 		isAuthenticated.isAuthenticated = false;
 		user.user = null;
+
 		if (e instanceof Response && e.status >= 300 && e.status <= 399) {
 			throw e; // Re-throw the redirect to SvelteKit
 		}
 		console.error('Auth check failed:', e);
-	} finally {
-		isLoading.isLoading = false;
 	}
 
 	return {};

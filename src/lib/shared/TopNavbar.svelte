@@ -1,18 +1,17 @@
 <script>
 	import Icon from '@iconify/svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { fade, slide } from 'svelte/transition';
-	import { kindeClient } from '$lib/stores/auth.svelte';
+	// import { kindeClient } from '$lib/stores/auth.svelte';
 	import { Browser } from '@capacitor/browser';
+	import { goto } from '$app/navigation';
 
 	let { name = 'User', isAuth = false } = $props();
 
 	let menuOpen = $state(false);
 
 	async function handleLogin () {
-		// const authUrl = await kindeClient.client.login();  // Or kinde.register() for sign-up
-		// await Browser.open({ url: kindeClient.client. });  // Open in system browser
-		// login();
+		goto('/auth/login');
 	}
 
 	function openNotifications() {
@@ -21,8 +20,8 @@
 </script>
 
 <nav
-	class="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b bg-white border-gray-100 px-4"
->
+	class="fixed {page.url.pathname === "/auth/login" ? "hidden" : ""} inset-x-0 top-0 z-50 flex items-center justify-between border-b bg-white border-gray-100 px-4"
+> 
 	<!-- <h1 class="text-lg font-bold grow">Metromale</h1> -->
 	<h1 class="grow text-2xl">Hi, <span class="font-medium">{name}</span>!</h1>
 
@@ -37,7 +36,7 @@
 		{#if !isAuth}
 			<button
 				onclick={handleLogin}
-				class="ml-4 inline-flex h-11 items-center justify-center rounded-full bg-yellow-400 px-4 text-sm font-semibold text-black shadow-sm hover:bg-yellow-300 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:outline-none"
+				class="ml-4 inline-flex h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-sm hover:bg-orange-300 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:outline-none"
 			>
 				Login
 				<Icon icon="ph:sign-in" class="ml-2 h-5 w-5" />

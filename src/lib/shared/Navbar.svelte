@@ -40,7 +40,7 @@
 			<a href={item.href} class="flex flex-1 flex-col items-center justify-center text-center">
 				<Icon
 					icon={activeHref === item.href ? item.iconFilled : item.icon}
-					class="h-6 w-6 {activeHref === item.href ? 'text-yellow-500' : 'text-gray-600'}"
+					class="h-6 w-6 {activeHref === item.href ? 'text-primary' : 'text-gray-600'}"
 				/>
 				<!-- <span class="text-xs">{item.label}</span> -->
 			</a>

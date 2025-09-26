@@ -1,22 +1,21 @@
 <script>
-	import { logout } from '$lib/auth';
+	import { goto } from '$app/navigation';
+	import { account } from '$lib/appwrite';
+
+	// import { logout } from '$lib/auth';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
 	import Icon from '@iconify/svelte';
 
 	async function handleLogout() {
 		try {
-			await logout();
+			await account.deleteSession('current');
+			isAuthenticated.isAuthenticated = false;
+			user.user = null;
+			goto('/');
 		} catch (error) {
 			console.error('Logout failed:', error);
 		}
 	}
-
-	// Example user data
-	// const user = {
-	//     name: "John Smith",
-	//     email: "johnsmith@email.com",
-	//     initials: "JS"
-	// };
 
 	// Menu options
 	const menu = [
@@ -40,7 +39,7 @@
 				<!-- <div class="w-16 h-16 rounded-full bg-gradient-to-br from-sky-200 to-emerald-100 flex items-center justify-center text-3xl font-bold text-gray-600 shadow-md">
                     {user.initials}
                 </div> -->
-				<div class="mt-2 text-lg font-semibold text-gray-900">{user.user.given_name}</div>
+				<div class="mt-2 text-lg font-semibold text-gray-900">{user.user.name}</div>
 				<div class="h-px w-full bg-gray-200"></div>
 				<div class="text-sm text-gray-500">{user.user.email}</div>
 			</div>
@@ -73,7 +72,7 @@
 				{/each}
 				<li>
 					<button
-						on:click={handleLogout}
+						onclick={handleLogout}
 						class="group w-full flex justify-start items-center text-left rounded-xl bg-red-200 px-5 py-4 transition-all hover:bg-red-300"
 					>
 						<Icon icon="mdi:logout" class={'mr-4 size-5 text-red-400 group-hover:text-red-500 '} />

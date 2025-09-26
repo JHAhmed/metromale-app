@@ -4,7 +4,7 @@
 </script>
 
 <div class="space-y-4 p-4 md:p-6">
-	<h1 class="text-lg font-medium text-gray-800">Dashboard</h1>
+	<h1 class="text-lg font-medium text-center text-gray-800">Dashboard</h1>
 
 	<div
 		class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1"
@@ -22,23 +22,18 @@
             <span class="sr-only">Add Appointment</span>
         </button> -->
 
-		<!-- <button class="absolute text-sm bottom-2 items-center justify-center text-white inline-flex right-2 transform rounded-full bg-amber-900 p-1 shadow-lg">
-            <span class="mx-3">Add Appointment</span>
-            <Icon icon="ph:plus" class="size-6 rounded-full p-0.5 bg-amber-600" />
-            <span class="sr-only">Add Appointment</span>
-        </button> -->
 	</div>
 
 	<div class="flex space-x-4">
 		<div class="w-full rounded-3xl bg-white p-6 shadow-lg/1">
-			<div class="flex h-36 w-full flex-col items-center justify-center space-y-6">
+			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
 				<Icon icon="ph:clipboard-text" class="size-8 text-gray-400" />
 				<h2 class="text-center font-medium text-gray-700">No Orders</h2>
 			</div>
 		</div>
 
 		<div class="w-full rounded-3xl bg-red-400 p-6 shadow-lg/1">
-			<div class="flex h-36 w-full flex-col items-center justify-center space-y-6">
+			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
 				<Icon icon="ph:asclepius" class="size-8 text-white" />
 				<h2 class="text-center font-medium text-white">Book Appointment</h2>
 
@@ -51,31 +46,7 @@
 
 <!-- ─── Latest From Dr. Karthik ────────────────────────────────────────────── -->
 <div class="space-y-4 p-4 md:p-6">
-	<h2 class="text-lg font-medium text-gray-800">Latest from Dr. Karthik Gunasekaran</h2>
-
-	<!-- <div class="flex space-x-4">
-		<a
-			href="/blog/latest"
-			class="w-full rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]"
-		>
-			<div class="flex h-36 w-full flex-col items-center justify-center space-y-4">
-				<Icon icon="ph:article" class="size-8 text-emerald-500" />
-				<h3 class="text-center font-medium text-gray-700">Understanding Preventive Care</h3>
-				<p class="text-center text-xs text-gray-500">4-min read • Sep 25</p>
-			</div>
-		</a>
-
-		<a
-			href="/videos/latest"
-			class="w-full rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]"
-		>
-			<div class="flex h-36 w-full flex-col items-center justify-center space-y-4">
-				<Icon icon="ph:video-camera" class="size-8 text-indigo-500" />
-				<h3 class="text-center font-medium text-gray-700">2-Minute Shoulder Stretch</h3>
-				<p class="text-center text-xs text-gray-500">Video • 2:14</p>
-			</div>
-		</a>
-	</div> -->
+	<h2 class="text-lg font-medium text-center text-gray-800">Latest from Dr. Karthik Gunasekaran</h2>
 
 	<a
 		href="/podcasts/latest"
