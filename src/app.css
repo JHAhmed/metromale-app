@@ -26,3 +26,11 @@
 [animate-in] {
   opacity: 0;
 }
+
+html, body {
+  -webkit-user-select: none; /* Safari/iOS */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard */
+  -webkit-touch-callout: none; /* Disable iOS long-press menu */
+  touch-action: manipulation; /* Limit touch gestures to prevent defaults */
+}
