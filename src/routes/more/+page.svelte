@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { account } from '$lib/appwrite';
 
-	// import { logout } from '$lib/auth';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
 	import Icon from '@iconify/svelte';
 
@@ -19,12 +18,12 @@
 
 	// Menu options
 	const menu = [
+		{ icon: 'mdi:translate', label: 'App Language' },
 		{ icon: 'mdi:credit-card-outline', label: 'Payment Management' },
 		{ icon: 'mdi:headphones', label: 'Help and Support' },
 		{ icon: 'mdi:shield-check-outline', label: 'Safety' },
-		{ icon: 'mdi:share-variant', label: 'Refer and Invite' },
+		// { icon: 'mdi:share-variant', label: 'Refer and Invite' },
 		{ icon: 'mdi:information-outline', label: 'About Us' },
-		{ icon: 'mdi:translate', label: 'App Language' }
 		// { icon: "mdi:logout", label: "Logout", color: "text-red-500" }
 	];
 </script>

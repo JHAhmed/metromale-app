@@ -39,7 +39,7 @@
 </svelte:head>
 
 <div
-	class="no-scrollbar scrollbar-hidden h-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 md:max-w-md"
+	class="no-scrollbar scrollbar-hidden h-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 md:mx-auto md:max-w-3xl"
 >
 	{#key name}
 		<TopNavbar {name} isAuth={isAuthenticated.isAuthenticated} />

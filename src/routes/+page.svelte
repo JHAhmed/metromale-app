@@ -3,8 +3,9 @@
     import { isAuthenticated } from '$lib/stores/auth.svelte';
 </script>
 
-<div class="space-y-4 p-4 md:p-6">
-	<h1 class="text-lg font-medium text-center text-gray-700">Dashboard</h1>
+<div class="space-y-4 p-6 pt-4 md:p-8">
+	<!-- <h1 class="text-lg font-medium text-center text-gray-700">Dashboard</h1> -->
+	<h1 class="text-2xl font-semibold text-gray-800">Dashboard</h1>
 
 	<div
 		class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1"
@@ -48,8 +49,9 @@
 </div>
 
 <!-- ─── Latest From Dr. Karthik ────────────────────────────────────────────── -->
-<div class="space-y-4 p-4 md:p-6">
-	<h2 class="text-lg font-medium text-center text-gray-700">Latest from Dr. Karthik Gunasekaran</h2>
+<div class="space-y-4 p-6 md:p-8">
+	<!-- <h2 class="text-lg font-medium text-center text-gray-700">Latest from Dr. Karthik Gunasekaran</h2> -->
+	<h2 class="text-xl font-semibold text-gray-800">Latest from Dr. Karthik Gunasekaran</h2>
 
 	<a
 		href="/podcasts/latest"
