@@ -37,7 +37,7 @@
     }
 </script>
 
-<section class="p-6 pt-4 md:p-8">
+<section class="p-4 md:p-8">
     <div class="mx-auto max-w-3xl">
         <div class="mb-6 flex items-center justify-between">
             <h1 class="text-2xl font-semibold text-gray-800">Appointments</h1>
@@ -55,9 +55,9 @@
                         <p class="text-xl font-semibold text-gray-900">{nextAppointment.doctorName}</p>
                         <p class="text-sm text-gray-600">{nextAppointment.specialty}</p>
                     </div>
-                    <div class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                    <!-- <div class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
                         {nextAppointment.type}
-                    </div>
+                    </div> -->
                 </div>
                 <div class="mt-4 border-t border-gray-200 pt-4">
                     <div class="flex items-center gap-3 text-gray-700">

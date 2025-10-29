@@ -5,7 +5,7 @@
 	} = $props();
 </script>
 
-<div class="fixed inset-0 z-100 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+<dialog class="fixed inset-0 z-100 flex items-center justify-center bg-black/20 backdrop-blur-sm">
 	<div
 		class="mx-8 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-black bg-white p-6 lg:w-1/4"
 	>
@@ -21,4 +21,4 @@
 			</p>
 		{/if}
 	</div>
-</div>
+</dialog>
