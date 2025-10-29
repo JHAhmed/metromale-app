@@ -3,7 +3,8 @@
 	"appName": "Metromale",
 	"webDir": "build",
 	"server": {
-		"androidScheme": "https"
+		"androidScheme": "https",
+		"iosScheme": "appwrite-callback-metromale"
 	},
 	"plugins": {
 		"App": {

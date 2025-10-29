@@ -35,6 +35,7 @@
 			await account.create('unique()', email, password, name);
 			await login();
 		} catch (e) {
+			console.error('SIGNUP FAILED:', e);
 			error = e.message;
 		}
 	}
@@ -48,6 +49,7 @@
 			goto('/');
 			loading = false;
 		} catch (e) {
+			console.error('SIGNUP FAILED:', e);
 			error = e.message;
 		}
 	}
