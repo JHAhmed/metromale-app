@@ -1,6 +1,6 @@
 <script>
 	import Icon from '@iconify/svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const navItems = [
 		{
@@ -30,7 +30,8 @@
 		{ href: '/more', label: 'Others', icon: 'ph:list', iconFilled: 'ph:list-bold' }
 	];
 
-	let activeHref = $derived($page.url.pathname);
+	let activeHrefRoot = $derived(page.url.pathname.split('/')[1] ? `/${page.url.pathname.split('/')[1]}` : '/');
+	// console.log(page.url)
 </script>
 
 <!-- <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white"> -->
@@ -39,8 +40,8 @@
 		{#each navItems as item}
 			<a href={item.href} class="flex flex-1 flex-col items-center justify-center text-center active:scale-95 active:opacity-80 transition-transform py-2">
 				<Icon
-					icon={activeHref === item.href ? item.iconFilled : item.icon}
-					class="h-6 w-6 {activeHref === item.href ? 'text-primary' : 'text-gray-600'}"
+					icon={activeHrefRoot === item.href ? item.iconFilled : item.icon}
+					class="h-6 w-6 {activeHrefRoot === item.href ? 'text-primary' : 'text-gray-600'}"
 				/>
 				<!-- <span class="text-xs">{item.label}</span> -->
 			</a>

@@ -36,6 +36,7 @@
 
 <svelte:head>
 	<link rel="icon" href={logo} />
+	<title>Metromale - Male Fertility Clinic</title>
 </svelte:head>
 
 <div

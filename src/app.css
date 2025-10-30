@@ -11,6 +11,8 @@
     --animate-spin: spin 4s linear infinite;
     --spacing-8xl: 86rem;
     --spacing-9xl: 94rem;
+
+    --breakpoint-xs: 24rem;
 }
 
 @utility no-scrollbar {
