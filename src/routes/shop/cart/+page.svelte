@@ -3,51 +3,120 @@
 	import { isAuthenticated } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { slide } from 'svelte/transition';
+	import { cart } from '$lib/stores/cart.svelte';
+	import { onMount } from 'svelte';
+	import { getProducts } from '$lib/tables/products';
+	import { storageAdapter } from '$lib/utils/storageAdapter';
+	import { products } from '$lib/stores/products.svelte';
+	import { getFile } from '$lib/utils/getFile';
+	
+	// onMount(async () => {
+	// 	console.log('Cart items on mount:', cart);
+	// 	console.log('Cart items in storage', await storageAdapter.getObject('cart'));
+	// 	console.log("Stored products:", products);
+	// });
 
-	let cartItems = $state([
-		{
-			id: 1,
-			title: 'Male Fertility Supplements',
-			price: 1999,
-			quantity: 2,
-			imageUrl: 'https://img.freepik.com/free-photo/medicines-healthcare-accessories-arranged-blue-surface_23-2148213988.jpg?semt=ais_hybrid&w=740&q=80'
-		},
-		{
-			id: 2,
-			title: 'Vitamin D3 Boost',
-			price: 799,
-			quantity: 1,
-			imageUrl: 'https://img.freepik.com/free-photo/vitamins-supplements-arranged-white-surface_23-2148213987.jpg?semt=ais_hybrid&w=740&q=80'
+	let cartItems = $derived.by(() => {
+		let items = [];
+		let missingItem = {
+			id: null,
+			product: {
+				name: 'Product Not Found',
+				price: 0,
+				imageUrls: []
+			},
+			quantity: 0
+		};
+		// Check if every product in cart.items exists in products list
+		for (let item of cart.items) {
+			let product = products.items.find(p => p.$id === item.product.$id);
+			if (product) {
+				items.push({
+					...item,
+					product
+				});
+			} else {
+				items.push({
+					...item,
+					product: missingItem.product
+				});
+			}
 		}
-	]);
+		return items;
+	});
+
+	// let cartItems = $state([
+	// 	{
+	// 		id: 1,
+	// 		title: 'Male Fertility Supplements',
+	// 		price: 1999,
+	// 		quantity: 2,
+	// 		imageUrl: 'https://img.freepik.com/free-photo/medicines-healthcare-accessories-arranged-blue-surface_23-2148213988.jpg?semt=ais_hybrid&w=740&q=80'
+	// 	},
+	// 	{
+	// 		id: 2,
+	// 		title: 'Vitamin D3 Boost',
+	// 		price: 799,
+	// 		quantity: 1,
+	// 		imageUrl: 'https://img.freepik.com/free-photo/vitamins-supplements-arranged-white-surface_23-2148213987.jpg?semt=ais_hybrid&w=740&q=80'
+	// 	}
+	// ]);
 
 	let addQuantity = (id) => {
-		const item = cartItems.find(item => item.id === id);
+		const item = cartItems.find(item => item.product.$id == id);
+
 		if (item) {
-			item.quantity = Math.max(1, item.quantity + 1);
+			// item.quantity = Math.max(1, item.quantity + 1);
+			item.quantity += 1;
+			// Update the cart.items to trigger reactivity
+			// cartItems = cartItems.map(i => (i.product.$id === id ? item : i));
+			cart.items = cart.items.map(i => (i.product.$id === id ? item : i));
+
+			storageAdapter.setObject('cart', cart);
 		}
 	};
     
 	let removeQuantity = (id) => {
-		const item = cartItems.find(item => item.id === id);
-		if (item) {
-			item.quantity = Math.max(0, item.quantity - 1);
-            if (item.quantity === 0) {
-                removeItem(id);
-            }
+
+		const item = cartItems.find(item => item.product.$id == id);
+
+		if (item && item.quantity > 1) {
+			item.quantity -= 1;
+			// Update the cart.items to trigger reactivity
+			// cartItems = cartItems.map(i => (i.product.$id === id ? item : i));
+			cart.items = cart.items.map(i => (i.product.$id === id ? item : i));
+
+			storageAdapter.setObject('cart', cart);
+		} else if (item && item.quantity === 1) {
+
+			removeItem(id);
+
 		}
+
+			storageAdapter.setObject('cart', cart);
+
+
+		// const item = cartItems.find(item => item.$id === id);
+		// if (item) {
+		// 	item.quantity = Math.max(0, item.quantity - 1);
+        //     if (item.quantity === 0) {
+        //         removeItem(id);
+        //     }
+		// }
 	};
 
 	let removeItem = (id) => {
-		cartItems = cartItems.filter(item => item.id !== id);
+		// cartItems = cartItems.filter(item => item.id !== id);
+		cart.items = cart.items.filter(item => item.product.$id !== id);
 	};
 
-	let subtotal = $derived(cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+	let subtotal = $derived(cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0));
 	let tax = $derived(subtotal * 0.18); // Assuming 18% GST
 	let total = $derived(subtotal + tax);
 
 	let clearCart = () => {
-		cartItems = [];
+		cart.items = [];
+		storageAdapter.setObject('cart', cart);
 	};
 </script>
 
@@ -82,22 +151,24 @@
 		</div>
 	{:else}
 		<div class="space-y-4">
-			{#each cartItems as item (item.id)}
+			{#each cartItems as item (item.product.$id)}
 				<div
 					class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-lg/1"
 					transition:slide
 				>
 					<div class="flex items-center space-x-4 flex-1">
 						<div class="h-14 w-14 aspect-square shrink-0 rounded-xl bg-gray-200 overflow-hidden hidden xs:block">
+							{#await getFile(item.product.imageUrls[0]) then imageUrl}
 							<img
-								src={item.imageUrl}
-								alt={item.title}
+								src={imageUrl}
+								alt={item.product.name}
 								class="h-full w-full object-cover aspect-square shrink-0"
 							/>
+							{/await}
 						</div>
 						<div class="">
-							<h3 class="font-semibold text-sm text-gray-700 line-clamp-2">{item.title}</h3>
-							<p class="text-xs text-gray-500">₹{item.price}</p>
+							<h3 class="font-semibold text-sm text-gray-700 line-clamp-2">{item.product.name}</h3>
+							<p class="text-xs text-gray-500">₹{item.product.price}</p>
 						</div>
 					</div>
 
@@ -106,20 +177,20 @@
 						<div class="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
 							<button
 								class="text-gray-600 hover:text-gray-800"
-								onclick={() => removeQuantity(item.id)}
+								onclick={() => removeQuantity(item.product.$id)}
 							>
 								<Icon icon="ph:minus" class="size-4" />
 							</button>
 							<span class="font-medium text-gray-700 min-w-2 text-center">{item.quantity}</span>
 							<button
 								class="text-gray-600 hover:text-gray-800"
-								onclick={() => addQuantity(item.id)}
+								onclick={() => addQuantity(item.product.$id)}
 							>
 								<Icon icon="ph:plus" class="size-4" />
 							</button>
 						</div>
 
-						<p class="font-semibold text-gray-800">₹{(item.price * item.quantity).toLocaleString()}</p>
+						<p class="font-semibold text-gray-800">₹{(item.product.price * item.quantity).toLocaleString()}</p>
 
 						<!-- <button
 							class="text-red-600 hover:text-red-800"

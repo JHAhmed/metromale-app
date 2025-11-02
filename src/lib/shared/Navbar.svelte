@@ -1,6 +1,22 @@
 <script>
-	import Icon from '@iconify/svelte';
+	import Icon, { loadIcon } from '@iconify/svelte';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
+
+	onMount(async () => {
+		const icons = [
+			'ph:calendar-check-duotone',
+			'ph:calendar-check-fill',
+			'ph:shopping-cart-duotone',
+			'ph:shopping-cart-fill',
+			'ph:house-simple-duotone',
+			'ph:house-simple-fill',
+			'ph:user-circle-duotone',
+			'ph:user-circle-fill',
+		];
+
+		await Promise.all(icons.map((i) => loadIcon(i)));
+	});
 
 	const navItems = [
 		{
@@ -31,7 +47,6 @@
 	];
 
 	let activeHrefRoot = $derived(page.url.pathname.split('/')[1] ? `/${page.url.pathname.split('/')[1]}` : '/');
-	// console.log(page.url)
 </script>
 
 <!-- <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white"> -->

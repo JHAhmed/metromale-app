@@ -5,6 +5,24 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
+
+		// prerender: {
+		// 	handleUnseenRoutes: async () => {
+		// 		// const products = await fetchProducts();
+		// 		// return products.map((product) => ({
+		// 		// 	type: 'page',
+		// 		// 	path: `/shop/${product.slug || product.id}`
+		// 		// }));
+		// 		return [
+		// 			{ type: 'page', path: '/shop/male-fertility-supplements' },
+		// 		];
+		// 	}
+		// },
+
+		prerender: {
+			handleUnseenRoutes: 'ignore'
+		},
+
 		adapter: adapter({
 			// default options are fine
 			pages: 'build',

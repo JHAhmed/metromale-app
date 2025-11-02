@@ -48,7 +48,6 @@
 		"@capacitor/preferences": "^7.0.2",
 		"@capacitor/status-bar": "^7.0.3",
 		"@iconify/svelte": "^5.0.2",
-		"@kinde-oss/kinde-auth-pkce-js": "^4.3.0",
 		"appwrite": "^20.1.0"
 	},
 	"optionalDependencies": {

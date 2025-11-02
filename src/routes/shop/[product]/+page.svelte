@@ -1,31 +1,91 @@
 <script>
 	import Icon from '@iconify/svelte';
-	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import Carousel from '$lib/components/ui/Carousel.svelte';
+	import { onMount } from 'svelte';
+	import { getFile } from '$lib/utils/getFile.js';
+	import { cart } from '$lib/stores/cart.svelte';
+	import { storageAdapter } from '$lib/utils/storageAdapter.js';
 
-	const { product: slug } = page.params;
+	let { data } = $props();
+	let product = data.product;
+	let images = $state([]);
+	
+	let addedToCart = $state(false);
 
-    let product = {
-		title: 'Male Fertility Supplements',
-		price: '1999',
-		description:
-			'Premium blend of vitamins, minerals, and herbal extracts designed to support male reproductive health. Clinically studied ingredients to improve sperm quality and motility.',
-		imageUrl:
-			'https://img.freepik.com/free-photo/medicines-healthcare-accessories-arranged-blue-surface_23-2148213988.jpg?semt=ais_hybrid&w=740&q=80',
-		benefits: [
-			'Boosts sperm count by up to 30%',
-			'Enhances energy and vitality',
-			'Supports hormonal balance'
-		],
-		ingredients: ['Zinc', 'Selenium', 'L-Carnitine', 'CoQ10', 'Folic Acid'],
-		usage: 'Take 2 capsules daily with meals. Consult your doctor before starting.'
-		// reviews: 4.8,
-		// stockQuantity: 50
-	};
+	// for url in product.imageUrls, fetch the actual file URL
+	// using getFile utility
 
-	if (slug !== 'male-fertility-supplements') {
-		console.warn('Product not found for slug:', slug);
+	onMount(async () => {
+		// For each url in product.imageUrls, fetch the actual file URL and store in images array as {imageUrl: url, alt: product.name}
+		images = await Promise.all(product.imageUrls.map(url => getFile(url).then(imageUrl => ({ imageUrl, alt: product.name }))));
+	});
+
+
+
+	// cart.items = [...cart.items, { product: product, quantity: 1 }];
+
+	// if (cart.items.length === 0) {
+	// 	cart.items = [{ product: product, quantity: 1 }];
+	// } else {
+	// 	let existingItem = cart.items.find(item => item.product.$id === product.$id);
+	// 	if (existingItem) {
+	// 		existingItem.quantity += 1;
+	// 	} else {
+	// 		cart.items = [...cart.items, { product: product, quantity: 1 }];
+	// 	}
+	// }
+
+	async function addToCart() {
+	
+		// let storedCard = await storageAdapter.getObject('cart');
+
+		// Here's what cart.items looks like:
+
+		// [
+		// 	product: {
+		// 		id: 'prod_123',
+		// 		name: 'Product Name',
+		// 		price: 100
+		// 		// other product details
+		// 	},
+		// 	quantity: 2
+		// }
+		// ];
+
+		// check if product already exists in cart
+		let existingItem = cart.items.find(item => item.product.$id === product.$id);
+		// if items exits, increase item.quantity by 1
+		if (existingItem) {
+			existingItem.quantity += 1;
+		} else {
+			// else add new item to cart
+			cart.items = [...cart.items, { product: product, quantity: 1 }];
+		}
+
+		addedToCart = true;
+		await storageAdapter.setObject('cart', cart);
+
 	}
+
+    // let product = {
+	// 	name: product.name,
+	// 	price: product.price,
+	// 	description: 
+	// 		'Premium blend of vitamins, minerals, and herbal extracts designed to support male reproductive health. Clinically studied ingredients to improve sperm quality and motility.',
+	// 	imageUrl:
+	// 		'https://img.freepik.com/free-photo/medicines-healthcare-accessories-arranged-blue-surface_23-2148213988.jpg?semt=ais_hybrid&w=740&q=80',
+	// 	benefits: [
+	// 		'Boosts sperm count by up to 30%',
+	// 		'Enhances energy and vitality',
+	// 		'Supports hormonal balance'
+	// 	],
+	// 	ingredients: ['Zinc', 'Selenium', 'L-Carnitine', 'CoQ10', 'Folic Acid'],
+	// 	usage: 'Take 2 capsules daily with meals. Consult your doctor before starting.'
+	// 	// reviews: 4.8,
+	// 	// stockQuantity: 50
+	// };
+
 </script>
 
 <div class="space-y-6 p-4 md:p-8">
@@ -37,42 +97,18 @@
 		<span class="text-sm font-medium">Back to Shop</span>
 	</button>
 
-	<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-
+	<div class="flex flex-col h-full gap-8">
 
 			<div class="rounded-3xl bg-gray-100">
-				<img
-					src={product.imageUrl}
-					alt={product.title}
-					class="aspect-square w-full rounded-2xl object-cover lg:aspect-[4/3]" />
+				<Carousel items={images} />
 			</div>
-
-        <!-- <div class="space-y-4">
-			<div class="rounded-3xl bg-gray-100 p-4">
-				<img
-					src={product.imageUrl}
-					alt={product.title}
-					class="aspect-square w-full rounded-2xl object-cover lg:aspect-[4/3]" />
-			</div>
-			{#if product.stockQuantity}
-                {#if product.stockQuantity > 0}
-				<div class="flex items-center space-x-2 text-sm text-emerald-600">
-					<Icon icon="ph:check-circle-fill" class="size-4" />
-					<span>In stockQuantity ({product.stockQuantity} available)</span>
-				</div>
-			    {:else}
-				<div class="flex items-center space-x-2 text-sm text-red-600">
-					<Icon icon="ph:x-circle-fill" class="size-4" />
-					<span>Out of stock</span>
-				</div>
-                {/if}
-			{/if}
-		</div> -->
 
 		<!-- Product Details -->
 		<div class="space-y-6">
+
+			<!-- Product Name & Price -->
 			<div>
-				<h1 class="mb-2 text-3xl font-bold text-gray-800">{product.title}</h1>
+				<h1 class="mb-2 text-3xl font-bold text-gray-800">{product.name}</h1>
 				{#if product.reviews}
 					<div class="mb-4 flex items-center space-x-2">
 						<div class="flex space-x-0.5 text-amber-500">
@@ -90,6 +126,7 @@
 
 			<p class="leading-relaxed text-gray-600">{product.description}</p>
 
+			{#if product.benefits?.length > 0}
 			<!-- Benefits -->
 			<div>
 				<h3 class="mb-3 text-lg font-semibold text-gray-800">Key Benefits</h3>
@@ -102,8 +139,10 @@
 					{/each}
 				</ul>
 			</div>
+			{/if}
 
 			<!-- Ingredients -->
+			{#if product.ingredients?.length > 0}
 			<div>
 				<h3 class="mb-3 text-lg font-semibold text-gray-800">Ingredients</h3>
 				<div class="flex flex-wrap gap-2">
@@ -114,19 +153,32 @@
 					{/each}
 				</div>
 			</div>
+			{/if}
 
 			<!-- Usage -->
+			{#if product.usage}
 			<div class="rounded-2xl bg-gray-50 p-4">
 				<h3 class="mb-2 font-semibold text-gray-800">How to Use</h3>
 				<p class="text-sm text-gray-600">{product.usage}</p>
 			</div>
+			{/if}
 
+			{#if !addedToCart}
             <button
-                class="w-full rounded-full bg-primary py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-primary/90 active:bg-primary/90 active:scale-[0.99]">
-                <Icon icon="ph:shopping-cart-simple" class="mr-2 inline size-5" />
+				onclick={addToCart}
+                class="w-full rounded-full grow bg-primary py-4 text-lg inline-flex items-center justify-center font-semibold text-white shadow-lg transition-colors hover:bg-primary/90 active:bg-primary/90 active:scale-[0.99]">
                 Add to Cart
+                <Icon icon="ph:shopping-cart-simple" class="ml-2  size-5" />
             </button>
-
+			{:else}
+			<button
+				onclick={() => goto('/shop/cart')}
+				class="w-full rounded-full grow bg-emerald-600 inline-flex items-center justify-center py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-emerald-700 active:bg-emerald-800 active:scale-[0.99]">
+				Added to Cart - View Cart
+				<Icon icon="ph:check-bold" class="ml-2  size-5" />
+			</button>
+			{/if}
+			
 			<!-- {#if product.stockQuantity > 0}
                 <button
                     class="w-full rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-amber-700 active:bg-amber-800">

@@ -4,10 +4,15 @@
 	import Product from '$lib/components/Product.svelte';
 	import { ViewTypes } from '$lib/enums';
 	import { slide } from 'svelte/transition';
+	import { cart } from '$lib/stores/cart.svelte';
+
+	let { data } = $props();
 
 	let showUpcomingOrders = $state(true);
 	let view = $state(ViewTypes.LIST);
 	let numProducts = $state(4);
+
+	console.log(cart.items);
 </script>
 
 <div class="space-y-4 p-4 md:p-8">
@@ -28,11 +33,20 @@
 		<div
 			transition:slide
 			class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1">
-			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
+			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6 ">
+
+				{#if cart.items.length === 0}
 				<Icon icon="ph:shopping-cart" class="size-8 text-gray-400" />
 				<h2 class="text-center font-medium text-gray-700">
 					{isAuthenticated.isAuthenticated ? 'No Upcoming Orders' : 'Login to view orders'}
 				</h2>
+				{:else}
+				<Icon icon="ph:package" class="size-8 text-gray-400" />
+				<h2 class="text-center font-medium text-gray-700">
+					You have {cart.items.length} item{cart.items.length === 1 ? '' : 's'} in your cart
+				</h2>
+				{/if}
+
 			</div>
 
 			<a
@@ -69,8 +83,8 @@
 	</div>
 
 	<div class="grid gap-4 {view === ViewTypes.GRID ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}">
-		{#each Array(numProducts) as _, i}
-			<Product bind:view />
+		{#each data.products as product (product.$id)}
+			<Product {product} bind:view />
 		{/each}
 	</div>
 </div>
