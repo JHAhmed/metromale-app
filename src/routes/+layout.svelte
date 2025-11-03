@@ -24,14 +24,6 @@
 		if (!isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)) {
 			goto('/auth/login');
 		}
-
-		// try {
-		// 	storedCart = await storageAdapter.getObject('cart');
-		// 	cart.items = storedCart.items || [];
-		// } catch (error) {
-		// 	console.log('No stored current cart found:', error);
-		// 	await storageAdapter.setObject('cart', cart);
-		// }
 	});
 
 	$effect(() => {

@@ -72,8 +72,9 @@
 
 <div class="flex min-h-[80vh] flex-col items-center justify-center p-6 space-y-8">
 
-	<div class="">
+	<div class="flex flex-col items-center space-y-4">
 		<img src={logo} class="size-12 rounded-full" alt="" />
+		<h1 class="text-2xl text-center tracking-tight font-medium text-gray-900">Metromale Clinic & Fertility Center</h1>
 	</div>
 
 	{#if !isAuthenticated.isAuthenticated}

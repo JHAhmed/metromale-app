@@ -41,7 +41,6 @@ export async function load({ url }) {
 		try {
 			const storedCart = await storageAdapter.getObject('cart');
 			cart.items = storedCart.items || [];
-
 			await loadProducts();
 		} catch (error) {
 			console.log('No stored current cart found:', error);

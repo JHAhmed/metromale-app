@@ -11,8 +11,8 @@
 			'ph:shopping-cart-fill',
 			'ph:house-simple-duotone',
 			'ph:house-simple-fill',
-			'ph:user-circle-duotone',
-			'ph:user-circle-fill',
+			'ph:article',
+			'ph:article-fill',
 		];
 
 		await Promise.all(icons.map((i) => loadIcon(i)));
@@ -38,10 +38,10 @@
 			iconFilled: 'ph:house-simple-fill'
 		},
 		{
-			href: '/profile',
-			label: 'Profile',
-			icon: 'ph:user-circle-duotone',
-			iconFilled: 'ph:user-circle-fill'
+			href: '/content',
+			label: 'Content',
+			icon: 'ph:article',
+			iconFilled: 'ph:article-fill'
 		},
 		{ href: '/more', label: 'Others', icon: 'ph:list', iconFilled: 'ph:list-bold' }
 	];

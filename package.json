@@ -48,7 +48,9 @@
 		"@capacitor/preferences": "^7.0.2",
 		"@capacitor/status-bar": "^7.0.3",
 		"@iconify/svelte": "^5.0.2",
-		"appwrite": "^20.1.0"
+		"appwrite": "^20.1.0",
+		"svelte-sonner": "^1.0.5",
+		"zod": "^4.1.12"
 	},
 	"optionalDependencies": {
 		"@img/sharp-win32-x64": "^0.34.4"

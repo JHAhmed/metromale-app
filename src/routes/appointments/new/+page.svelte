@@ -1,0 +1,190 @@
+<script>
+	import { goto } from '$app/navigation';
+	import { slide } from 'svelte/transition';
+	import { z } from 'zod'; // <-- 1. Import Zod
+	import { toast, Toaster } from 'svelte-sonner';
+
+	import Icon from '@iconify/svelte';
+	import PatientDetails from '$lib/components/PatientDetails.svelte';
+	import GuardianDetails from '$lib/components/GuardianDetails.svelte';
+	import LocationSelector from '$lib/components/LocationSelector.svelte';
+	import SlotSelector from '$lib/components/SlotSelector.svelte';
+	import { addAppointment } from '$lib/tables/appointments';
+	import { user } from '$lib/stores/auth.svelte';
+
+	let bookingForSelf = $state(true);
+	let selectedLocation = $state('');
+	let selectedSlot = $state('');
+
+	let patient = $state({
+		name: '',
+		age: '',
+		gender: '',
+		phone: '',
+		email: ''
+	});
+
+	let guardian = $state({
+		name: '',
+		age: '',
+		phone: '',
+		email: '',
+		relation: '',
+		otherRelation: ''
+	});
+
+	let errors = $state({});
+
+	let buttonEnabled = $derived.by(() => {
+		return selectedLocation && selectedSlot && patient.name && patient.age && patient.gender;
+	});
+
+	const locations = $state({
+		OMR: ['10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM'],
+		Porur: ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '3:00 PM', '4:00 PM'],
+		'T Nagar': ['11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM']
+	});
+
+	$effect(() => {
+		if (selectedLocation && !locations[selectedLocation].includes(selectedSlot)) {
+			selectedSlot = '';
+		}
+	});
+
+	const patientSchema = (bookingForSelf) =>
+		z.object({
+			name: z.string().min(1, 'Patient name is required'),
+			age: z.number().min(1, 'Patient age is required'),
+			gender: z.string().min(1, 'Patient gender is required'),
+			phone: bookingForSelf
+				? z.string().min(10, 'Patient phone must be at least 10 digits')
+				: z.string(),
+			email: bookingForSelf ? z.string().email('Patient email is invalid') : z.string()
+		});
+
+	const guardianSchema = z
+		.object({
+			name: z.string().min(1, 'Guardian name is required'),
+			age: z.number().min(1, 'Guardian age is required'),
+			phone: z.string().min(10, 'Guardian phone must be at least 10 digits'),
+			email: z.string().email('Guardian email is invalid'),
+			relation: z.string().min(1, 'Guardian relation is required'),
+			otherRelation: z.string().optional()
+		})
+		.superRefine((data, ctx) => {
+			if (data.relation === 'Other' && !data.otherRelation?.trim()) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					path: ['otherRelation'],
+					message: 'Please specify the relation'
+				});
+			}
+		});
+
+	const bookingForSelfSchema = z.object({
+		bookingForSelf: z.literal(true),
+		selectedLocation: z.string().min(1, 'Please select a location'),
+		selectedSlot: z.string().min(1, 'Please select a time slot'),
+		patient: patientSchema(true), // Invoke with true for required phone/email
+		guardian: z.object({}).passthrough().optional() // Guardian ignored when booking for self
+	});
+
+	const bookingForOtherSchema = z.object({
+		bookingForSelf: z.literal(false),
+		selectedLocation: z.string().min(1, 'Please select a location'),
+		selectedSlot: z.string().min(1, 'Please select a time slot'),
+		patient: patientSchema(false), // Invoke with false for optional phone/email
+		guardian: guardianSchema // Guardian required here
+	});
+
+	const bookingSchema = z.discriminatedUnion('bookingForSelf', [
+		bookingForSelfSchema,
+		bookingForOtherSchema
+	]);
+
+	async function handleSubmit(e) {
+		e.preventDefault();
+
+		const formData = {
+			bookingForSelf,
+			selectedLocation,
+			selectedSlot,
+			patient,
+			guardian
+		};
+
+		errors = {};
+
+		const result = bookingSchema.safeParse(formData);
+		let toastMessage = '';
+
+		if (!result.success) {
+			toastMessage = 'Please enter all required fields!';
+			console.log('Validation errors:', result.error);
+			toast.error(toastMessage.trim());
+			return;
+		}
+
+		console.log('Validation successful!', result.data);
+
+		try {
+			const appointment = await addAppointment({
+				userId: user.$id,
+				appointmentDatetime: selectedSlot,
+				branch: selectedLocation,
+				patient: result.data.patient,
+				guardian: bookingForSelf ? null : result.data.guardian
+			});
+		} catch (error) {
+			console.error(error);
+			toast.error('An error occurred while booking the appointment.');
+			return;
+		}
+	}
+</script>
+
+<Toaster richColors />
+
+<div class="space-y-6 p-4 md:p-8">
+	<h1 class="text-2xl font-semibold text-gray-800">Book New Appointment</h1>
+
+	<form onsubmit={handleSubmit} class="space-y-6">
+		<div class="rounded-3xl bg-white p-6 shadow-lg/1">
+			<label class="flex cursor-pointer items-center space-x-3">
+				<input
+					type="checkbox"
+					bind:checked={bookingForSelf}
+					class="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+				<span class="text-sm font-medium text-gray-700">Booking for myself</span>
+			</label>
+		</div>
+
+		<PatientDetails bind:patient {bookingForSelf} />
+
+		{#if !bookingForSelf}
+			<div transition:slide>
+				<GuardianDetails bind:guardian />
+			</div>
+		{/if}
+
+		<LocationSelector bind:selectedLocation {locations} />
+
+		{#if selectedLocation}
+			<SlotSelector bind:selectedSlot slots={locations[selectedLocation]} />
+		{:else}
+			<div class="rounded-3xl bg-gray-50 p-6 text-center">
+				<Icon icon="ph:calendar" class="mx-auto mb-2 size-8 text-gray-400" />
+				<p class="text-gray-600">Select a location to view available slots</p>
+			</div>
+		{/if}
+
+		<button
+			type="submit"
+			onclick={handleSubmit}
+			disabled={!buttonEnabled}
+			class="w-full rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99] disabled:bg-gray-400">
+			<Icon icon="ph:calendar-plus" class="mr-2 inline size-5" />
+			Book Appointment
+		</button>
+	</form>
+</div>

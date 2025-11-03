@@ -4,17 +4,9 @@
 	import { goto } from '$app/navigation';
 	import { slide } from 'svelte/transition';
 	import { cart } from '$lib/stores/cart.svelte';
-	import { onMount } from 'svelte';
-	import { getProducts } from '$lib/tables/products';
 	import { storageAdapter } from '$lib/utils/storageAdapter';
 	import { products } from '$lib/stores/products.svelte';
 	import { getFile } from '$lib/utils/getFile';
-	
-	// onMount(async () => {
-	// 	console.log('Cart items on mount:', cart);
-	// 	console.log('Cart items in storage', await storageAdapter.getObject('cart'));
-	// 	console.log("Stored products:", products);
-	// });
 
 	let cartItems = $derived.by(() => {
 		let items = [];
@@ -27,9 +19,9 @@
 			},
 			quantity: 0
 		};
-		// Check if every product in cart.items exists in products list
+
 		for (let item of cart.items) {
-			let product = products.items.find(p => p.$id === item.product.$id);
+			let product = products.items.find((p) => p.$id === item.product.$id);
 			if (product) {
 				items.push({
 					...item,
@@ -45,72 +37,41 @@
 		return items;
 	});
 
-	// let cartItems = $state([
-	// 	{
-	// 		id: 1,
-	// 		title: 'Male Fertility Supplements',
-	// 		price: 1999,
-	// 		quantity: 2,
-	// 		imageUrl: 'https://img.freepik.com/free-photo/medicines-healthcare-accessories-arranged-blue-surface_23-2148213988.jpg?semt=ais_hybrid&w=740&q=80'
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		title: 'Vitamin D3 Boost',
-	// 		price: 799,
-	// 		quantity: 1,
-	// 		imageUrl: 'https://img.freepik.com/free-photo/vitamins-supplements-arranged-white-surface_23-2148213987.jpg?semt=ais_hybrid&w=740&q=80'
-	// 	}
-	// ]);
-
 	let addQuantity = (id) => {
-		const item = cartItems.find(item => item.product.$id == id);
+		// Since cartItems is a derived store, we just need to update items in cart store
+		const item = cartItems.find((item) => item.product.$id == id);
 
 		if (item) {
-			// item.quantity = Math.max(1, item.quantity + 1);
 			item.quantity += 1;
-			// Update the cart.items to trigger reactivity
-			// cartItems = cartItems.map(i => (i.product.$id === id ? item : i));
-			cart.items = cart.items.map(i => (i.product.$id === id ? item : i));
+			cart.items = cart.items.map((i) => (i.product.$id === id ? item : i));
 
 			storageAdapter.setObject('cart', cart);
 		}
 	};
-    
-	let removeQuantity = (id) => {
 
-		const item = cartItems.find(item => item.product.$id == id);
+	let removeQuantity = (id) => {
+		// Since cartItems is a derived store, we just need to update items in cart store
+		const item = cartItems.find((item) => item.product.$id == id);
 
 		if (item && item.quantity > 1) {
 			item.quantity -= 1;
-			// Update the cart.items to trigger reactivity
-			// cartItems = cartItems.map(i => (i.product.$id === id ? item : i));
-			cart.items = cart.items.map(i => (i.product.$id === id ? item : i));
+			cart.items = cart.items.map((i) => (i.product.$id === id ? item : i));
 
 			storageAdapter.setObject('cart', cart);
 		} else if (item && item.quantity === 1) {
-
 			removeItem(id);
-
 		}
 
-			storageAdapter.setObject('cart', cart);
-
-
-		// const item = cartItems.find(item => item.$id === id);
-		// if (item) {
-		// 	item.quantity = Math.max(0, item.quantity - 1);
-        //     if (item.quantity === 0) {
-        //         removeItem(id);
-        //     }
-		// }
+		storageAdapter.setObject('cart', cart);
 	};
 
 	let removeItem = (id) => {
-		// cartItems = cartItems.filter(item => item.id !== id);
-		cart.items = cart.items.filter(item => item.product.$id !== id);
+		cart.items = cart.items.filter((item) => item.product.$id !== id);
 	};
 
-	let subtotal = $derived(cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0));
+	let subtotal = $derived(
+		cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+	);
 	let tax = $derived(subtotal * 0.18); // Assuming 18% GST
 	let total = $derived(subtotal + tax);
 
@@ -125,27 +86,24 @@
 		<h1 class="text-2xl font-semibold text-gray-800">Shopping Cart</h1>
 		{#if cartItems.length > 0}
 			<button
-				class="flex items-center font-medium space-x-1 text-sm text-red-600 hover:text-red-800 bg-gray-100 p-1 px-2 rounded-lg"
-				onclick={clearCart}
-			>
-            <span>Clear Cart</span>
-            <!-- <Icon icon="ph:trash-simple-bold" class="size-4" /> -->
+				class="flex items-center space-x-1 rounded-lg bg-gray-100 p-1 px-2 text-sm font-medium text-red-600 hover:text-red-800"
+				onclick={clearCart}>
+				<span>Clear Cart</span>
+				<!-- <Icon icon="ph:trash-simple-bold" class="size-4" /> -->
 			</button>
 		{/if}
 	</div>
 
 	{#if cartItems.length === 0}
 		<div
-			class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-8 shadow-lg/1 text-center"
-			transition:slide
-		>
-			<Icon icon="ph:shopping-cart" class="size-12 text-gray-400 mb-4" />
-			<h2 class="text-lg font-medium text-gray-700 mb-2">Your cart is empty</h2>
-			<p class="text-sm text-gray-500 mb-6">Add some products to get started.</p>
+			class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-8 text-center shadow-lg/1"
+			transition:slide>
+			<Icon icon="ph:shopping-cart" class="mb-4 size-12 text-gray-400" />
+			<h2 class="mb-2 text-lg font-medium text-gray-700">Your cart is empty</h2>
+			<p class="mb-6 text-sm text-gray-500">Add some products to get started.</p>
 			<button
 				class="rounded-full bg-amber-600 px-6 py-3 text-sm font-semibold text-white hover:bg-amber-700"
-				onclick={() => goto('/shop')}
-			>
+				onclick={() => goto('/shop')}>
 				Continue Shopping
 			</button>
 		</div>
@@ -154,60 +112,52 @@
 			{#each cartItems as item (item.product.$id)}
 				<div
 					class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-lg/1"
-					transition:slide
-				>
-					<div class="flex items-center space-x-4 flex-1">
-						<div class="h-14 w-14 aspect-square shrink-0 rounded-xl bg-gray-200 overflow-hidden hidden xs:block">
+					transition:slide>
+					<div class="flex flex-1 items-center space-x-4">
+						<div
+							class="hidden aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-200 xs:block">
 							{#await getFile(item.product.imageUrls[0]) then imageUrl}
-							<img
-								src={imageUrl}
-								alt={item.product.name}
-								class="h-full w-full object-cover aspect-square shrink-0"
-							/>
+								<img
+									src={imageUrl}
+									alt={item.product.name}
+									class="aspect-square h-full w-full shrink-0 object-cover" />
 							{/await}
 						</div>
 						<div class="">
-							<h3 class="font-semibold text-sm text-gray-700 line-clamp-2">{item.product.name}</h3>
+							<h3 class="line-clamp-2 text-sm font-semibold text-gray-700">{item.product.name}</h3>
 							<p class="text-xs text-gray-500">₹{item.product.price}</p>
 						</div>
 					</div>
 
 					<div class="flex items-center space-x-4">
 						<!-- Quantity stepper -->
-						<div class="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
+						<div class="flex items-center space-x-2 rounded-full bg-gray-100 px-3 py-1">
 							<button
 								class="text-gray-600 hover:text-gray-800"
-								onclick={() => removeQuantity(item.product.$id)}
-							>
+								onclick={() => removeQuantity(item.product.$id)}>
 								<Icon icon="ph:minus" class="size-4" />
 							</button>
-							<span class="font-medium text-gray-700 min-w-2 text-center">{item.quantity}</span>
+							<span class="min-w-2 text-center font-medium text-gray-700">{item.quantity}</span>
 							<button
 								class="text-gray-600 hover:text-gray-800"
-								onclick={() => addQuantity(item.product.$id)}
-							>
+								onclick={() => addQuantity(item.product.$id)}>
 								<Icon icon="ph:plus" class="size-4" />
 							</button>
 						</div>
 
-						<p class="font-semibold text-gray-800">₹{(item.product.price * item.quantity).toLocaleString()}</p>
-
-						<!-- <button
-							class="text-red-600 hover:text-red-800"
-							onclick={() => removeItem(item.id)}
-						>
-							<Icon icon="ph:x" class="size-5" />
-						</button> -->
+						<p class="font-semibold text-gray-800">
+							₹{(item.product.price * item.quantity).toLocaleString()}
+						</p>
 					</div>
 				</div>
 			{/each}
 		</div>
 
 		<!-- Summary -->
-		<div class="lg:w-1/3 lg:ml-auto">
+		<div class="lg:ml-auto lg:w-1/3">
 			<div class="rounded-3xl bg-white p-6 shadow-lg/1">
-				<h2 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
-				<div class="space-y-3 mb-4">
+				<h2 class="mb-4 text-lg font-semibold text-gray-800">Order Summary</h2>
+				<div class="mb-4 space-y-3">
 					<div class="flex justify-between text-sm text-gray-600">
 						<span>Subtotal</span>
 						<span>₹{subtotal.toLocaleString()}</span>
@@ -217,7 +167,7 @@
 						<span>₹{tax.toLocaleString()}</span>
 					</div>
 				</div>
-				<div class="border-t border-gray-400 pt-4 mb-6">
+				<div class="mb-6 border-t border-gray-400 pt-4">
 					<div class="flex justify-between text-xl font-bold text-gray-800">
 						<span>Total</span>
 						<span>₹{total.toLocaleString()}</span>
@@ -225,20 +175,18 @@
 				</div>
 				{#if isAuthenticated.isAuthenticated}
 					<button
-						class="w-full rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg hover:bg-amber-700 active:scale-[0.99] transition-all"
-						onclick={() => goto('/checkout')}
-					>
-						<Icon icon="ph:arrow-right" class="inline mr-2 size-5" />
+						class="w-full rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]"
+						onclick={() => goto('/checkout')}>
+						<Icon icon="ph:arrow-right" class="mr-2 inline size-5" />
 						Proceed to Checkout
 					</button>
 				{:else}
 					<button
-						class="w-full rounded-full bg-gray-400 py-4 text-lg font-semibold text-white shadow-lg cursor-not-allowed"
-						disabled
-					>
+						class="w-full cursor-not-allowed rounded-full bg-gray-400 py-4 text-lg font-semibold text-white shadow-lg"
+						disabled>
 						Login to Checkout
 					</button>
-					<p class="text-center text-sm text-gray-500 mt-2">
+					<p class="mt-2 text-center text-sm text-gray-500">
 						<a href="/login" class="text-amber-600 hover:underline">Sign in</a> to continue
 					</p>
 				{/if}

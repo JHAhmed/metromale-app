@@ -13,28 +13,10 @@
 	
 	let addedToCart = $state(false);
 
-	// for url in product.imageUrls, fetch the actual file URL
-	// using getFile utility
-
 	onMount(async () => {
 		// For each url in product.imageUrls, fetch the actual file URL and store in images array as {imageUrl: url, alt: product.name}
 		images = await Promise.all(product.imageUrls.map(url => getFile(url).then(imageUrl => ({ imageUrl, alt: product.name }))));
 	});
-
-
-
-	// cart.items = [...cart.items, { product: product, quantity: 1 }];
-
-	// if (cart.items.length === 0) {
-	// 	cart.items = [{ product: product, quantity: 1 }];
-	// } else {
-	// 	let existingItem = cart.items.find(item => item.product.$id === product.$id);
-	// 	if (existingItem) {
-	// 		existingItem.quantity += 1;
-	// 	} else {
-	// 		cart.items = [...cart.items, { product: product, quantity: 1 }];
-	// 	}
-	// }
 
 	async function addToCart() {
 	
@@ -68,6 +50,7 @@
 
 	}
 
+	// // Sample product data for testing
     // let product = {
 	// 	name: product.name,
 	// 	price: product.price,

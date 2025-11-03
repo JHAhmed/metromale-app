@@ -2,7 +2,7 @@ import { tablesDB, Query } from '$lib/appwrite.js';
 import { error } from '@sveltejs/kit';
 
 export async function load({ params, fetch }) {
-	const { product: slug } = params;
+	const { slug } = params;
 	const queries = [Query.equal('slug', slug)];
 
 	// 2. Fetch data for this specific slug from your CMS

@@ -7,6 +7,7 @@
 	let { name = 'User', isAuth = false } = $props();
 
 	let menuOpen = $state(false);
+	// const hiddenPaths = ['/auth/login'];
 
 	async function handleLogin () {
 		goto('/auth/login');
@@ -15,6 +16,8 @@
 	function openNotifications() {
 		menuOpen = !menuOpen;
 	}
+
+	console.log(page.url.pathname);
 </script>
 
 <nav
