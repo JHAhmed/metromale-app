@@ -4,7 +4,7 @@
 	let {
 		value = $bindable(),
 		placeholder = 'Select Gender',
-		options = ['Male', 'Female', 'Other'],
+		options = [{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'other', label: 'Other' }],
 		required = true,
         error = '',
 		label,
@@ -29,8 +29,7 @@
 	{required}>
 	<option class="rounded-lg bg-gray-50 {value === "" ? 'opacity-0' : ''}" value="">{placeholder}</option>
 	{#each options as option}
-		<option class="rounded-lg bg-gray-50" value={option.toLowerCase().replace(/\s+/g, '-')}
-			>{option}</option>
+		<option class="rounded-lg bg-gray-50" value={option.value}>{option.label}</option>
 	{/each}
 </select>
 

@@ -1,8 +1,17 @@
-import { tablesDB, ID, Query } from '$lib/appwrite';
+import { tablesDB, ID, Query, Permission, Role } from '$lib/appwrite';
 
 export async function addAppointment(appointmentData) {
     try {
-        const newAppointment = await tablesDB.createRow('metromale', 'appointments', ID.unique(), appointmentData);
+        const newAppointment = await tablesDB.createRow(
+            'metromale', 
+            'appointments', 
+            ID.unique(), 
+            appointmentData,
+            [
+                Permission.read(Role.user(appointmentData.userId)),
+                Permission.write(Role.user(appointmentData.userId))
+            ]
+        );
         return newAppointment;
     } catch (error) {
         console.error('Error creating appointment:', error);
@@ -25,9 +34,17 @@ export async function getAppointment(appointmentId) {
     }
 }
 
-export async function getAppointments() {
+export async function getUserAppointments(userId) {
+    if (!userId) {
+        console.error('User ID is missing, cannot query appointments.');
+        return { rows: [], total: 0 };
+    }
+
     try {
-        const appointments = await tablesDB.listRows('metromale', 'appointments');
+
+        const queries = [Query.equal('userId', userId)];
+
+        const appointments = await tablesDB.listRows('metromale', 'appointments', queries);
         return appointments;
     } catch (error) {
         console.error('Error fetching appointments:', error);

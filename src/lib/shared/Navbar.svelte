@@ -2,6 +2,7 @@
 	import Icon, { loadIcon } from '@iconify/svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { cart } from '$lib/stores/cart.svelte';
 
 	onMount(async () => {
 		const icons = [
@@ -47,6 +48,7 @@
 	];
 
 	let activeHrefRoot = $derived(page.url.pathname.split('/')[1] ? `/${page.url.pathname.split('/')[1]}` : '/');
+	let itemCount = $derived(cart.items.reduce((sum, item) => sum + item.quantity, 0));
 </script>
 
 <!-- <nav class="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white"> -->

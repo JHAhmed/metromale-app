@@ -6,7 +6,7 @@
 	import { account } from '$lib/appwrite';
 	import Modal from '$lib/shared/Modal.svelte';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
-
+	import { toast, Toaster } from 'svelte-sonner';
 	import Icon from '@iconify/svelte';
 
 	let loading = $state(false);
@@ -28,6 +28,8 @@
 		} else {
 			await login();
 		}
+
+		loading = false;
 	}
 
 	async function signup() {
@@ -37,6 +39,7 @@
 		} catch (e) {
 			console.error('SIGNUP FAILED:', e);
 			error = e.message;
+			toast.error(`Signup failed: ${error}`);
 		}
 	}
 
@@ -49,8 +52,9 @@
 			goto('/');
 			loading = false;
 		} catch (e) {
-			console.error('SIGNUP FAILED:', e);
+			console.error('LOGIN FAILED:', e);
 			error = e.message;
+			toast.error(`Login failed: ${error}`);
 		}
 	}
 
@@ -62,9 +66,12 @@
 			goto('/');
 		} catch (error) {
 			console.error('Logout failed:', error);
+			toast.error(`Logout failed: ${error}`);
 		}
 	}
 </script>
+
+<Toaster richColors />
 
 {#if loading}
 	<Modal text="Logging in..." />

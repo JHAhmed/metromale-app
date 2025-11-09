@@ -31,6 +31,7 @@
 			goto('/auth/login');
 		}
 	});
+
 </script>
 
 <svelte:head>

@@ -36,7 +36,16 @@
 					label="Relation to Patient"
 					bind:value={guardian.relation}
 					placeholder="Select relation"
-					options={['Parent', 'Spouse', 'Sibling', 'Other']}
+					options={
+						[
+							{ value: 'father', label: 'Father' },
+							{ value: 'mother', label: 'Mother' },
+							{ value: 'brother', label: 'Brother' },
+							{ value: 'sister', label: 'Sister' },
+							{ value: 'spouse', label: 'Spouse' },
+							{ value: 'other', label: 'Other' }
+						]
+					}
 					required={true} />
 			</div>
 			{#if guardian.relation === 'other'}

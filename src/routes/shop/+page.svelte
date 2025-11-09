@@ -6,8 +6,9 @@
 	import { slide } from 'svelte/transition';
 	import { cart } from '$lib/stores/cart.svelte';
 	import { onMount } from 'svelte';
+	import { getProducts } from '$lib/tables/products.js';
 
-	let { data } = $props();
+	// let { data } = $props();
 
 	let showUpcomingOrders = $state(false);
 	let view = $state(ViewTypes.LIST);
@@ -86,8 +87,27 @@
 	</div>
 
 	<div class="grid gap-4 {view === ViewTypes.GRID ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}">
-		{#each data.products as product (product.$id)}
-			<Product {product} bind:view />
-		{/each}
+		{#await getProducts()}
+			<div
+				class="rounded-xl border border-dashed border-gray-200 bg-white/50 p-8 text-center backdrop-blur-sm">
+				<p class="text-gray-500">Please wait...</p>
+			</div>
+		{:then products}
+			{#if products && products.total > 0}
+				{#each products.rows as product (product.$id)}
+					<Product {product} bind:view />
+				{/each}
+			{:else}
+				<div
+					class="rounded-xl border border-dashed border-gray-200 bg-white/50 p-8 text-center backdrop-blur-sm">
+					<p class="text-gray-500">No products found.</p>
+				</div>
+			{/if}
+		{:catch error}
+			<div
+				class="rounded-xl border border-dashed border-red-500 bg-white/50 p-8 text-center backdrop-blur-sm">
+				<p class="text-gray-500">Something went wrong: {error.message}</p>
+			</div>
+		{/await}
 	</div>
 </div>

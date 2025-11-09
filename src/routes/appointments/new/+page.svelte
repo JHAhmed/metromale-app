@@ -11,10 +11,12 @@
 	import SlotSelector from '$lib/components/SlotSelector.svelte';
 	import { addAppointment } from '$lib/tables/appointments';
 	import { user } from '$lib/stores/auth.svelte';
+	import { addPatient } from '$lib/tables/patients';
 
 	let bookingForSelf = $state(true);
 	let selectedLocation = $state('');
 	let selectedSlot = $state('');
+	let savePatientDetails = $state(false);
 
 	let patient = $state({
 		name: '',
@@ -102,8 +104,30 @@
 		bookingForOtherSchema
 	]);
 
+	async function savePatient() {
+
+		try {
+			await addPatient({
+				associatedUserId: user.user.$id,
+				name: patient.name,
+				age: patient.age,
+				gender: patient.gender,
+				phone: patient.phone,
+				email: patient.email
+			});
+			toast.success('Patient details saved successfully!');
+		} catch (error) {
+			console.error('Error saving patient details:', error);
+			toast.error('Failed to save patient details.');
+		}
+	}
+
 	async function handleSubmit(e) {
 		e.preventDefault();
+
+		if (savePatientDetails) {
+			await savePatient();
+		}
 
 		const formData = {
 			bookingForSelf,
@@ -129,12 +153,23 @@
 
 		try {
 			const appointment = await addAppointment({
-				userId: user.$id,
+				userId: user.user.$id,
 				appointmentDatetime: selectedSlot,
 				branch: selectedLocation,
-				patient: result.data.patient,
-				guardian: bookingForSelf ? null : result.data.guardian
+				patientName: patient.name,
+				patientAge: patient.age,
+				patientGender: patient.gender,
+				patientPhone: patient.phone,
+				patientEmail: patient.email,
+				guardianName: bookingForSelf ? null : guardian.name,
+				guardianAge: bookingForSelf ? null : guardian.age,
+				guardianPhone: bookingForSelf ? null : guardian.phone,
+				guardianEmail: bookingForSelf ? null : guardian.email,
+				guardianRelation: bookingForSelf ? null : guardian.relation,
 			});
+
+			toast.success('Appointment booked successfully!');
+			goto(`/appointments/${appointment.$id}`);
 		} catch (error) {
 			console.error(error);
 			toast.error('An error occurred while booking the appointment.');
@@ -149,6 +184,10 @@
 	<h1 class="text-2xl font-semibold text-gray-800">Book New Appointment</h1>
 
 	<form onsubmit={handleSubmit} class="space-y-6">
+
+
+		<PatientDetails bind:patient {bookingForSelf} bind:savePatientDetails />
+
 		<div class="rounded-3xl bg-white p-6 shadow-lg/1">
 			<label class="flex cursor-pointer items-center space-x-3">
 				<input
@@ -158,8 +197,6 @@
 				<span class="text-sm font-medium text-gray-700">Booking for myself</span>
 			</label>
 		</div>
-
-		<PatientDetails bind:patient {bookingForSelf} />
 
 		{#if !bookingForSelf}
 			<div transition:slide>
