@@ -29,10 +29,13 @@
 		onclick={() => goto(`/shop/${product.slug}`)}
 		class="flex h-32 items-center justify-start rounded-3xl bg-white text-left shadow-lg/1 transition-transform hover:scale-[1.01] active:scale-[0.99]">
 		<div class="mr-4 h-full rounded-xl bg-gray-200">
-			<img
-				src={image}
-				class="aspect-square h-full w-full rounded-xl object-cover"
-				alt="" />
+			{#await getFile(product.imageUrls[0]) then url}
+					
+				<img
+					src={url}
+					class="aspect-square h-full w-full rounded-xl object-cover"
+					alt="" />
+			{/await}
 		</div>
 
 		<div class="flex flex-col items-start space-y-2 p-2">

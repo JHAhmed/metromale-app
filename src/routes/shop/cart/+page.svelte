@@ -175,10 +175,10 @@
 				</div>
 				{#if isAuthenticated.isAuthenticated}
 					<button
-						class="w-full rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]"
+						class="inline-flex w-full items-center justify-center rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]"
 						onclick={() => goto('/checkout')}>
-						<Icon icon="ph:arrow-right" class="mr-2 inline size-5" />
 						Proceed to Checkout
+						<Icon icon="ph:arrow-right-bold" class="ml-2 size-5" />
 					</button>
 				{:else}
 					<button

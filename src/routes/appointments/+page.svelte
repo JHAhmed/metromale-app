@@ -7,7 +7,7 @@
     // Helper function to format dates and times
     function formatDateTime(dateString, options) {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-IN', options).format(date);
+        return new Intl.DateTimeFormat('en-GB', options).format(date);
     }
 
     // Function to separate appointments by time

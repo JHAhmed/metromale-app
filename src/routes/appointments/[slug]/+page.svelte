@@ -25,9 +25,7 @@
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
-			hour: 'numeric',
-			minute: 'numeric'
-		}).format(new Date(datetime));
+				}).format(new Date(datetime));
 	};
 </script>
 
@@ -54,6 +52,11 @@
 						<Icon icon="ph:calendar" class="size-5 text-gray-500" />
 						<span class="text-sm text-gray-600"
 							>{formatDateTime(appointment.appointmentDatetime)}</span>
+					</div>
+					<div class="flex items-center space-x-3">
+						<Icon icon="ph:clock" class="size-5 text-gray-500" />
+						<span class="text-sm text-gray-600"
+							>{appointment.appointmentSlot}</span>
 					</div>
 					<div class="flex items-center space-x-3">
 						<Icon

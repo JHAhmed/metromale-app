@@ -3,7 +3,30 @@
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	let { data } = $props();
+
+	const iconMap = {
+		blog: {
+			icon: 'ph:article',
+			color: 'text-emerald-500'
+		},
+		podcast: {
+			icon: 'ph:headphones',
+			color: 'text-primary'
+		},
+		video: {
+			icon: 'ph:video-camera',
+			color: 'text-red-500'
+		}
+	};
+
+	let mardkdownContent = $state('');
+
+	onMount(async () => {
+		const { marked } = await import('marked');
+		mardkdownContent = marked.parse(data.post.content);
+	});
 </script>
 
 <svelte:head>
@@ -19,23 +42,24 @@
 		<span class="text-sm font-medium">Back to Content</span>
 	</button>
 
-	<article class="prose prose-lg max-w-none">
-		<header class="space-y-4">
-			<h1 class="text-3xl font-bold text-gray-800">{data.post.title}</h1>
-			<p class="text-gray-600">{data.post.description}</p>
+	<article class="prose prose-sm max-w-none">
+		<header class="space-y-4 my-8 bg-gray-200 p-4 px-6 rounded-2xl">
+			<h1 class="text-2xl font-bold text-gray-800">{data.post.title}</h1>
+			<p class="text-gray-600 text-sm">{data.post.description}</p>
 			<div class="flex items-center space-x-4 text-sm text-gray-500">
-				<Icon icon={data.post.type === 'blog' ? 'ph:article' : 'ph:headphones'} class="size-4" />
+				<Icon icon={iconMap[data.post.type].icon} class="size-4 {iconMap[data.post.type].color}" />
 				<span>{data.post.type} • {new Date(data.post.$createdAt).toLocaleDateString('en-GB')}</span>
 			</div>
 		</header>
 
 		{#if data.post.type === 'blog'}
-			<div class="prose prose-gray max-w-none rounded-2xl bg-white p-6 shadow-lg/1">
-				{@html data.post.content}
+			<div class="prose prose-sm px-2 prose-gray max-w-none prose-headings:text-primary prose-headings:leading-0">
+				{@html mardkdownContent}
 			</div>
 		{:else if data.post.type === 'podcast' && data.post.youtubeUrl}
 			<div class="rounded-2xl bg-white p-6 shadow-lg/1">
 				<iframe
+					title={data.post.title}
 					src={data.post.youtubeUrl}
 					width="100%"
 					height="450"
