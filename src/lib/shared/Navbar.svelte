@@ -68,6 +68,6 @@
     
 </nav>
 
-<!-- <div class="h-10 inset-x-0 fixed bottom-0 bg-white"></div> -->
+<div class="h-10 inset-x-0 fixed bottom-0 bg-white"></div>
 
 <div class="h-16"></div>

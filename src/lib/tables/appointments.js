@@ -39,15 +39,33 @@ export async function getUserAppointments(userId) {
         console.error('User ID is missing, cannot query appointments.');
         return { rows: [], total: 0 };
     }
-
     try {
-
         const queries = [Query.equal('userId', userId)];
-
         const appointments = await tablesDB.listRows('metromale', 'appointments', queries);
         return appointments;
     } catch (error) {
         console.error('Error fetching appointments:', error);
         return { rows: [], total: 0 };
+    }
+}
+
+
+export async function getLatestUserAppointment(userId) {
+    if (!userId) {
+        console.error('User ID is missing, cannot query appointments.');
+        return null;
+    }
+
+    try {
+        const queries = [
+            Query.equal('userId', userId),
+            Query.orderDesc('$createdAt'),
+            Query.limit(1)
+        ];
+        const res = await tablesDB.listRows('metromale', 'appointments', queries);
+        return res.total > 0 ? res.rows[0] : null;
+    } catch (error) {
+        console.error('Error fetching latest appointment:', error);
+        return null;
     }
 }

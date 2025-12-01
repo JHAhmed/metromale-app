@@ -15,12 +15,14 @@ export async function getPost(postId) {
     }
 }
 
-export async function getPosts() {
-    try {
-        const posts = await tablesDB.listRows('metromale', 'posts');
-        return posts;
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-        return { rows: [], total: 0 };
-    }
+export async function getPosts(number) {
+	const limit = Number.isInteger(number) && number > 0 ? number : undefined;
+
+	try {
+		const queries = limit ? [Query.limit(limit), Query.equal('isPublished', true)] : [Query.equal('isPublished', true)];
+		return await tablesDB.listRows('metromale', 'posts', queries);
+	} catch (error) {
+		console.error('Error fetching posts:', error);
+		return { rows: [], total: 0 };
+	}
 }

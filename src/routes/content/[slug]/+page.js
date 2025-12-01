@@ -15,7 +15,7 @@ export async function load({ params, fetch }) {
             tableId: 'posts',
             queries
         });
-        const post = res.rows?.[0] ?? null;
+        const post = res.rows?.[0]
         return { post };
     } catch (err) {
         console.error(err);

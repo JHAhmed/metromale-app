@@ -99,7 +99,7 @@
 					{#if isRegistering}
 						Please fill in the details to get started.
 					{:else}
-						Sign in to continue to your dashboard.
+						Sign in to continue to your app.
 					{/if}
 				</p>
 			</div>

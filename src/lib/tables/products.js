@@ -15,10 +15,12 @@ export async function getProduct(productId) {
 	}
 }
 
-export async function getProducts() {
+export async function getProducts(number) {
+	const limit = Number.isInteger(number) && number > 0 ? number : undefined;
+
 	try {
-		const products = await tablesDB.listRows('metromale', 'products');
-		return products;
+		const queries = limit ? [Query.limit(limit)] : [];
+		return await tablesDB.listRows('metromale', 'products', queries);
 	} catch (error) {
 		console.error('Error fetching products:', error);
 		return { rows: [], total: 0 };

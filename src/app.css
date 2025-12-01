@@ -36,3 +36,7 @@ html, body {
   -webkit-touch-callout: none; /* Disable iOS long-press menu */
   touch-action: manipulation; /* Limit touch gestures to prevent defaults */
 }
+
+@view-transition {
+  navigation: auto;
+}

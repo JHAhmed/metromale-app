@@ -6,6 +6,7 @@
 	import { getFile } from '$lib/utils/getFile.js';
 	import { cart } from '$lib/stores/cart.svelte';
 	import { storageAdapter } from '$lib/utils/storageAdapter.js';
+	import { fade } from 'svelte/transition';
 
 	let { data } = $props();
 	let product = data.product;
@@ -147,6 +148,7 @@
 
 			{#if !addedToCart}
 				<button
+					
 					onclick={addToCart}
 					class="inline-flex w-full grow items-center justify-center rounded-full bg-primary py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-primary/90 active:scale-[0.99] active:bg-primary/90">
 					Add to Cart
@@ -154,6 +156,7 @@
 				</button>
 			{:else}
 				<button
+					transition:fade
 					onclick={() => goto('/shop/cart')}
 					class="inline-flex w-full grow items-center justify-center rounded-full bg-emerald-600 py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-emerald-700 active:scale-[0.99] active:bg-emerald-800">
 					Added to Cart - View Cart

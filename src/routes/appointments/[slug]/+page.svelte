@@ -154,6 +154,22 @@
 					</div>
 				</div>
 			{/if}
+
+			<div class="flex space-x-2">
+
+				<button
+					class="w-full rounded-lg bg-primary px-5 py-3 text-white hover:bg-primary-dark focus:outline-none focus:ring-none active:scale-99 active:opacity-95"
+					onclick={() => goto(`/appointments/${appointment.$id}/edit`)}>
+					Edit Appointment
+				</button>
+
+				<button
+					class="w-full rounded-lg bg-gray-300 px-5 py-3 text-black hover:bg-primary-dark focus:outline-none focus:ring-none active:scale-99 active:opacity-95"
+					onclick={() => goto(`/appointments/${appointment.$id}/edit`)}>
+					Reschedule 
+				</button>
+			</div>
+
 		</div>
 	</div>
 </div>
