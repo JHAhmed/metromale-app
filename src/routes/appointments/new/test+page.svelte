@@ -4,6 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { CalendarDate, parseDate, getLocalTimeZone } from '@internationalized/date';
+	import { Checkout } from 'capacitor-razorpay';
 
 	import { user } from '$lib/stores/auth.svelte';
 	import { addAppointment } from '$lib/tables/appointments';
@@ -172,6 +173,34 @@
 		}
 	}
 
+	async function payForAppointment() {
+		const options = {
+			key: 'rzp_test_RmV2q8Jo5oVw0E', // Replace with your actual Razorpay Key ID
+			amount: '1000', // Amount in paise (e.g., 50000 = 500 INR)
+			currency: 'INR',
+			name: 'Metromale Clinic',
+			description: 'Appointment Booking Fee',
+			// image: 'https://metromaleclinic.com/logo.png', // Optional: Add your logo URL
+			prefill: {
+				email: patient.email || user.user.email,
+				contact: patient.phone || user.user.phone
+			},
+			theme: {
+				color: '#d97706' // amber-600
+			}
+		};
+
+		try {
+			const data = await Checkout.open(options);
+			console.log('Payment Success:', data.response);
+			return true;
+		} catch (error) {
+			console.error('Payment Failed:', error);
+			toast.error('Payment failed. Please try again.');
+			return false;
+		}
+	}
+
 	async function handleSubmit(e) {
 		e.preventDefault();
 
@@ -202,6 +231,10 @@
 
 		console.log('Validation successful!', result.data);
 
+		// Initiate Payment
+		const paymentSuccess = await payForAppointment();
+		if (!paymentSuccess) return;
+
 		try {
 			const appointment = await addAppointment({
 				userId: user.user.$id,
@@ -220,8 +253,8 @@
 				guardianRelation: bookingForSelf ? null : guardian.relation
 			});
 
-			// toast.success('Appointment booked successfully!');
-			goto(`/appointments/checkout`);
+			toast.success('Appointment booked successfully!');
+			goto(`/appointments/${appointment.$id}`);
 		} catch (error) {
 			console.error(error);
 			toast.error('An error occurred while booking the appointment.');

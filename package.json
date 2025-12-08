@@ -46,10 +46,12 @@
 		"@capacitor/core": "^7.4.3",
 		"@capacitor/ios": "^7.4.3",
 		"@capacitor/preferences": "^7.0.2",
+		"@capacitor/push-notifications": "^7.0.3",
 		"@capacitor/status-bar": "^7.0.3",
 		"@iconify/svelte": "^5.0.2",
 		"appwrite": "^20.1.0",
 		"bits-ui": "^2.14.2",
+		"capacitor-razorpay": "^1.3.0",
 		"marked": "^17.0.0",
 		"svelte-sonner": "^1.0.5",
 		"zod": "^4.1.12"

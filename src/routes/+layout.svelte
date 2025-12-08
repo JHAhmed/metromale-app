@@ -4,6 +4,7 @@
 	import logo from '$lib/assets/logo.svg';
 	import { onMount } from 'svelte';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte.js';
+	import { PushNotifications } from '@capacitor/push-notifications';
 
 	import Modal from '$lib/shared/Modal.svelte';
 	import Navbar from '$lib/shared/Navbar.svelte';
@@ -20,6 +21,48 @@
 	let name = $derived(user?.user?.name || 'User');
 	const publicRoutes = ['/auth/login', '/'];
 
+	async function initPush() {
+		// Check/request permissions
+		let permStatus = await PushNotifications.checkPermissions();
+		if (permStatus.receive === 'prompt') {
+			permStatus = await PushNotifications.requestPermissions();
+		}
+		if (permStatus.receive !== 'granted') return console.error('Permissions denied');
+
+		// Register
+		await PushNotifications.register();
+
+		// Listen for token
+		PushNotifications.addListener('registration', async (token) => {
+			try {
+				console.log('Token registered');
+				await account.createPushTarget(user.user.$id, token.value);
+			} catch (error) {
+				console.error('Token registration failed:', error);
+			}
+		});
+
+		// Handle incoming notifications (optional, for foreground)
+		PushNotifications.addListener('pushNotificationReceived', (notification) => {
+			console.log('Received:', notification);
+			// e.g., show in-app alert for friend request
+		});
+
+		// Handle taps
+		PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+			console.log('Action:', action);
+			// Navigate to friend requests page
+		});
+
+		// Create default channel (Android)
+		await PushNotifications.createChannel({
+			id: 'fcm_default_channel',
+			name: 'Messages',
+			description: 'General notifications',
+			importance: 4
+		});
+	}
+
 	onMount(async () => {
 		if (!isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)) {
 			goto('/auth/login');
@@ -30,8 +73,11 @@
 		if (!isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)) {
 			goto('/auth/login');
 		}
-	});
 
+		if (user?.isAuthenticated) {
+			initPush();
+		}
+	});
 </script>
 
 <svelte:head>

@@ -24,8 +24,8 @@
 			weekday: 'long',
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric',
-				}).format(new Date(datetime));
+			day: 'numeric'
+		}).format(new Date(datetime));
 	};
 </script>
 
@@ -43,6 +43,34 @@
 	</button>
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+		<!-- Payment Status -->
+		{#if appointment.status === 'pending'}
+			<div
+				class="flex w-full items-center justify-between rounded-xl border border-dashed border-gray-300 bg-gray-100 p-4">
+				<div class="flex w-full items-center space-x-3">
+					<!-- <Icon icon="ph:clock" class="size-5 text-yellow-600" /> -->
+					<span class="font-medium text-gray-800 capitalize"
+						>Please pay to confirm your appointment!</span>
+
+					{#if appointment.status === 'pending'}
+						<div class="ml-auto flex gap-2">
+							<a class="" href="https://api.wurks.studio/metromale?amount=20000">
+								<button
+									class="hover:bg-primary-dark focus:ring-none ml-2 rounded-lg bg-primary px-5 py-3 text-white focus:outline-none active:scale-99 active:opacity-95">
+									Pay Now
+								</button>
+							</a>
+
+							<button
+								class="hover:bg-primary-dark focus:ring-none ml-2 rounded-lg bg-primary px-5 py-3 text-white focus:outline-none active:scale-99 active:opacity-95">
+								Refresh
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
 		<!-- Main Details -->
 		<div class="space-y-4">
 			<div class="rounded-3xl bg-white p-6 shadow-lg/1">
@@ -55,8 +83,7 @@
 					</div>
 					<div class="flex items-center space-x-3">
 						<Icon icon="ph:clock" class="size-5 text-gray-500" />
-						<span class="text-sm text-gray-600"
-							>{appointment.appointmentSlot}</span>
+						<span class="text-sm text-gray-600">{appointment.appointmentSlot}</span>
 					</div>
 					<div class="flex items-center space-x-3">
 						<Icon
@@ -156,20 +183,18 @@
 			{/if}
 
 			<div class="flex space-x-2">
-
 				<button
-					class="w-full rounded-lg bg-primary px-5 py-3 text-white hover:bg-primary-dark focus:outline-none focus:ring-none active:scale-99 active:opacity-95"
+					class="hover:bg-primary-dark focus:ring-none w-full rounded-lg bg-primary px-5 py-3 text-white focus:outline-none active:scale-99 active:opacity-95"
 					onclick={() => goto(`/appointments/${appointment.$id}/edit`)}>
 					Edit Appointment
 				</button>
 
 				<button
-					class="w-full rounded-lg bg-gray-300 px-5 py-3 text-black hover:bg-primary-dark focus:outline-none focus:ring-none active:scale-99 active:opacity-95"
+					class="hover:bg-primary-dark focus:ring-none w-full rounded-lg bg-gray-300 px-5 py-3 text-black focus:outline-none active:scale-99 active:opacity-95"
 					onclick={() => goto(`/appointments/${appointment.$id}/edit`)}>
-					Reschedule 
+					Reschedule
 				</button>
 			</div>
-
 		</div>
 	</div>
 </div>

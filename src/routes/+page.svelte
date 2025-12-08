@@ -5,11 +5,23 @@
 	import { getPosts } from '$lib/tables/posts';
 	import { iconMap } from '$lib';
 	import { getLatestUserAppointment } from '$lib/tables/appointments';
+	import { onMount } from 'svelte';
 
 	function formatDateTime(dateString, options) {
 		const date = new Date(dateString);
 		return new Intl.DateTimeFormat('en-GB', options).format(date);
 	}
+
+	onMount(async () => {
+		try {
+			const res = await fetch('https://api.wurks.studio/api/');
+
+			const data = await res.json();
+			console.log(data);
+		} catch (error) {
+			console.log(error);
+		}
+	});
 </script>
 
 <div class="space-y-4 p-4 md:p-8">
@@ -34,8 +46,7 @@
 			<div class="flex h-32 w-full flex-col items-center justify-center space-y-4">
 				{#if appointment}
 					<h2 class="text-center font-medium text-gray-700">Upcoming Appointment</h2>
-					<div
-						class="relative flex items-center justify-center bg-white p-2">
+					<div class="relative flex items-center justify-center bg-white p-2">
 						<div class="flex items-start justify-between">
 							<div>
 								<p class="text-xl font-semibold text-gray-900">{appointment.patientName}</p>
