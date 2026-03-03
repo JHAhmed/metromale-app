@@ -72,7 +72,7 @@
 	let subtotal = $derived(
 		cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 	);
-	let tax = $derived(subtotal * 0.0); // Assuming 18% GST
+	let tax = $derived(subtotal * 0.18); // Assuming 18% GST
 	let total = $derived(subtotal + tax);
 
 	let clearCart = () => {
@@ -176,7 +176,7 @@
 				{#if isAuthenticated.isAuthenticated}
 					<button
 						class="inline-flex w-full items-center justify-center rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]"
-						onclick={() => goto('/shop/cart/checkout')}>
+						onclick={() => goto('/checkout')}>
 						Proceed to Checkout
 						<Icon icon="ph:arrow-right-bold" class="ml-2 size-5" />
 					</button>

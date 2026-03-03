@@ -99,8 +99,7 @@
 			<!-- Security Note -->
 			<div class="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-500">
 				<Icon icon="ph:lock-simple" class="size-4" />
-				<!-- <span>Secure payment powered by Razorpay</span> -->
-				<span>Secure Payment</span>
+				<span>Secure payment powered by Razorpay</span>
 			</div>
 		</div>
 
