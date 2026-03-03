@@ -6,22 +6,12 @@
 	import { iconMap } from '$lib';
 	import { getLatestUserAppointment } from '$lib/tables/appointments';
 	import { onMount } from 'svelte';
+	import { getLatestUserOrder } from '$lib/tables/orders';
 
 	function formatDateTime(dateString, options) {
 		const date = new Date(dateString);
 		return new Intl.DateTimeFormat('en-GB', options).format(date);
 	}
-
-	onMount(async () => {
-		try {
-			const res = await fetch('https://api.wurks.studio/api/');
-
-			const data = await res.json();
-			console.log(data);
-		} catch (error) {
-			console.log(error);
-		}
-	});
 </script>
 
 <div class="space-y-4 p-4 md:p-8">
@@ -46,18 +36,22 @@
 			<div class="flex h-32 w-full flex-col items-center justify-center space-y-4">
 				{#if appointment}
 					<h2 class="text-center font-medium text-gray-700">Upcoming Appointment</h2>
-					<div class="relative flex items-center justify-center bg-white p-2">
-						<div class="flex items-start justify-between">
+					<div class="relative flex flex-col items-center justify-center bg-white p-2">
+						<div class="flex flex-col items-center justify-between">
 							<div>
-								<p class="text-xl font-semibold text-gray-900">{appointment.patientName}</p>
-								<p class="text-sm text-gray-600">{appointment.branch}</p>
+								<p class="text-center text-lg font-semibold text-gray-900">
+									{appointment.patientName}
+								</p>
+								<p class="text-center text-sm text-gray-600">
+									{appointment.branch} - {appointment.appointmentSlot}
+								</p>
 							</div>
 						</div>
 
-						<div class="mx-4 h-[80%] w-px bg-gray-400"></div>
+						<!-- <div class="mx-4 h-[80%] w-px bg-gray-400"></div> -->
 
-						<div class="">
-							<div class="flex items-center gap-3 text-gray-700">
+						<div class="mt-2">
+							<div class="flex items-center gap-3 text-sm text-gray-700">
 								<!-- <Icon icon="ph:calendar-blank" class="h-5 w-5 text-gray-500" /> -->
 								<span class="font-medium">
 									{formatDateTime(appointment.appointmentDatetime, { dateStyle: 'full' })}
@@ -90,12 +84,55 @@
 	{/await}
 
 	<div class="flex space-x-4">
-		<div class="w-full rounded-3xl bg-white p-6 shadow-lg/1">
-			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
-				<Icon icon="ph:clipboard-text" class="size-8 text-gray-400" />
-				<h2 class="text-center font-medium text-gray-700">No Orders</h2>
+		{#await getLatestUserOrder(user?.user?.$id)}
+			<div
+				class="relative flex w-full flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1">
+				<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
+					<Icon icon="ph:package" class="size-8 animate-pulse text-gray-400" />
+					<h2 class="text-center font-medium text-gray-700">Loading...</h2>
+				</div>
 			</div>
-		</div>
+		{:then order}
+			{#if order}
+				<a
+					href="/shop/orders/{order.$id}"
+					class="relative flex w-full flex-col rounded-3xl bg-white p-6 shadow-lg/1 transition-transform active:scale-99">
+					<div class="flex h-32 w-full flex-col justify-between">
+						<div class="flex items-start justify-between">
+							<div>
+								<p class="text-xs text-gray-500">Latest Order</p>
+								<p class="font-mono text-sm font-medium text-gray-700">
+									#{order.orderId?.slice(-8) || order.$id.slice(-8)}
+								</p>
+							</div>
+							<span
+								class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 capitalize"
+								>{order.status}</span>
+						</div>
+						<div class="mt-auto flex items-end justify-between">
+							<div>
+								<p class="text-xl font-bold text-gray-900">₹{order.totalAmount?.toFixed(2)}</p>
+								<p class="text-xs text-gray-500">
+									{order.itemCount}
+									{order.itemCount === 1 ? 'item' : 'items'}
+								</p>
+							</div>
+							<Icon icon="ph:arrow-right" class="size-5 text-gray-400" />
+						</div>
+					</div>
+				</a>
+			{:else}
+				<div
+					class="relative flex w-full flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1">
+					<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
+						<Icon icon="ph:package" class="size-8 text-gray-400" />
+						<h2 class="text-center font-medium text-gray-700">
+							{isAuthenticated.isAuthenticated ? 'No Orders' : 'Login to view Orders'}
+						</h2>
+					</div>
+				</div>
+			{/if}
+		{/await}
 
 		<button
 			onclick={() => goto('/appointments/new')}
