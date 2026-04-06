@@ -4,7 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { CalendarDate, parseDate, getLocalTimeZone } from '@internationalized/date';
-	import { Checkout } from 'capacitor-razorpay';
+	// import { Checkout } from 'capacitor-razorpay';
 
 	import { user } from '$lib/stores/auth.svelte';
 	import { addAppointment } from '$lib/tables/appointments';
@@ -191,7 +191,7 @@
 		};
 
 		try {
-			const data = await Checkout.open(options);
+			// const data = await Checkout.open(options);
 			console.log('Payment Success:', data.response);
 			return true;
 		} catch (error) {

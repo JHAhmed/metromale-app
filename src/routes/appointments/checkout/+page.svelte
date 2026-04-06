@@ -3,27 +3,63 @@
 	import { goto } from '$app/navigation';
 	import { toast, Toaster } from 'svelte-sonner';
 	import Icon from '@iconify/svelte';
+	import { page } from '$app/state';
+	import { getUserAppointments } from '$lib/tables/appointments';
+	import { onMount } from 'svelte';
 
-	const PAYMENT_URL = 'https://api.wurks.studio/metromale?amount=20000';
+	const userId = page.url.searchParams.get('userId');
+	const appointmentId = $derived(page.url.searchParams.get('appointmentId'));
+
+	// const PAYMENT_URL = 'https://rzp.io/rzp/g4fYwzc';
+	let PAYMENT_URL = $derived(`https://api.wurks.studio/metromale/pay?appointmentId=${appointmentId}&userId=${userId}`);
 	const BOOKING_FEE = 200; // ₹200.00 (amount is in paise: 20000)
 
+	console.log(PAYMENT_URL);
+
 	let paymentStatus = $state('pending');
+	let paymentCompleted = $state(false);
 	let isRefreshing = $state(false);
 
-	function handlePayNow() {
+	onMount(async () => {
+		let appointments = await getUserAppointments(userId);
+		// console.log('User Appointments:', appointments);
+		let appointment = appointments.rows.find(app => app.$id === appointmentId);
+		// let appointment = null;
+		console.log('Current Appointment:', appointment);
+		if (appointment) {
+			if (appointment.paymentCompleted === true) {
+				paymentCompleted = true;
+				goto('/appointments');
+				toast.success('Payment already completed for this appointment. Redirecting to appointments page.');
+			} 
+		}
+		// else {
+		// 	toast.error('Appointment not found. Please try again.');
+		// 	goto('/appointments');
+		// }
+	}
+);
+
+	async function handlePayNow() {
 		// Open payment URL in same window - user will be redirected back after payment
 		window.location.href = PAYMENT_URL;
+
+		if (paymentCompleted) {
+			toast.success('Payment successful! Your appointment is confirmed.');
+			goto('/appointments');
+		} 
+
 	}
 
-	function handleRefresh() {
-		isRefreshing = true;
-		// TODO: Implement payment verification API call
-		// This will check if payment is completed and verified
-		setTimeout(() => {
-			isRefreshing = false;
-			toast.info('Payment verification coming soon');
-		}, 1000);
-	}
+	// function handleRefresh() {
+	// 	isRefreshing = true;
+	// 	// TODO: Implement payment verification API call
+	// 	// This will check if payment is completed and verified
+	// 	setTimeout(() => {
+	// 		isRefreshing = false;
+	// 		toast.info('Payment verification coming soon');
+	// 	}, 1000);
+	// }
 </script>
 
 <Toaster richColors />

@@ -54,7 +54,7 @@
 
 					{#if appointment.status === 'pending'}
 						<div class="ml-auto flex gap-2">
-							<a class="" href="https://api.wurks.studio/metromale?amount=20000">
+							<a class="" href="https://rzp.io/rzp/g4fYwzc">
 								<button
 									class="hover:bg-primary-dark focus:ring-none ml-2 rounded-lg bg-primary px-5 py-3 text-white focus:outline-none active:scale-99 active:opacity-95">
 									Pay Now

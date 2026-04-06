@@ -221,7 +221,7 @@
 			});
 
 			// toast.success('Appointment booked successfully!');
-			goto(`/appointments/checkout`);
+			goto(`/appointments/checkout?appointmentId=${appointment.$id}&userId=${user.user.$id}`);
 		} catch (error) {
 			console.error(error);
 			toast.error('An error occurred while booking the appointment.');
