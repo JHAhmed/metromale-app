@@ -4,7 +4,7 @@
 
 	let { selectedLocation = $bindable(), locations } = $props();
 
-	const locationOptions = Object.keys(locations);
+	let locationOptions = $derived(Object.keys(locations));
 </script>
 
 <div class="space-y-4">

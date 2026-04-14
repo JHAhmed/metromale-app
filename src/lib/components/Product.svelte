@@ -10,7 +10,9 @@
 	let image = $state('');
 
 	onMount(async () => {
-		image = await getFile(product.imageUrls[0]);
+		if (product.imageUrls?.[0]) {
+			image = await getFile(product.imageUrls[0]);
+		}
 	});
 
 	// let product = {
@@ -28,15 +30,17 @@
 	<div
 		onclick={() => goto(`/shop/${product.slug}`)}
 		class="flex h-32 items-center justify-start rounded-3xl bg-white text-left shadow-lg/1 transition-transform hover:scale-[1.01] active:scale-[0.99]">
-		<div class="mr-4 h-full rounded-xl bg-gray-200">
-			{#await getFile(product.imageUrls[0]) then url}
-					
-				<img
-					src={url}
-					class="aspect-square h-full w-full rounded-xl object-cover"
+		{#if product.imageUrls?.[0]}
+			<div class="mr-4 h-full rounded-xl bg-gray-200">
+				{#await getFile(product.imageUrls[0]) then url}
+									
+					<img
+						src={url}
+						class="aspect-square h-full w-full rounded-xl object-cover"
 					alt="" />
 			{/await}
 		</div>
+		{/if}
 
 		<div class="flex flex-col items-start space-y-2 p-2">
 			<h3 class="leading-tight font-semibold text-gray-700">{product.name}</h3>

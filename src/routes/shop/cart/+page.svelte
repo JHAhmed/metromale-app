@@ -72,7 +72,8 @@
 	let subtotal = $derived(
 		cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 	);
-	let tax = $derived(subtotal * 0.18); // Assuming 18% GST
+	// let tax = $derived(subtotal * 0.18); // Assuming 18% GST
+	let tax = $derived(subtotal * 0); // Assuming 18% GST
 	let total = $derived(subtotal + tax);
 
 	let clearCart = () => {
@@ -114,15 +115,17 @@
 					class="flex items-center justify-between rounded-2xl bg-white p-3 shadow-lg/1"
 					transition:slide>
 					<div class="flex flex-1 items-center space-x-4">
-						<div
-							class="hidden aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-200 xs:block">
-							{#await getFile(item.product.imageUrls[0]) then imageUrl}
-								<img
-									src={imageUrl}
-									alt={item.product.name}
-									class="aspect-square h-full w-full shrink-0 object-cover" />
-							{/await}
-						</div>
+						{#if item.product.imageUrls?.[0]}
+							<div
+								class="hidden aspect-square h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-gray-200 xs:block">
+								{#await getFile(item.product.imageUrls[0]) then imageUrl}
+									<img
+										src={imageUrl}
+										alt={item.product.name}
+										class="aspect-square h-full w-full shrink-0 object-cover" />
+								{/await}
+							</div>
+						{/if}
 						<div class="">
 							<h3 class="line-clamp-2 text-sm font-semibold text-gray-700">{item.product.name}</h3>
 							<p class="text-xs text-gray-500">₹{item.product.price}</p>
@@ -176,7 +179,7 @@
 				{#if isAuthenticated.isAuthenticated}
 					<button
 						class="inline-flex w-full items-center justify-center rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]"
-						onclick={() => goto('/checkout')}>
+						onclick={() => goto('/shop/checkout')}>
 						Proceed to Checkout
 						<Icon icon="ph:arrow-right-bold" class="ml-2 size-5" />
 					</button>

@@ -6,8 +6,8 @@
 	import { CalendarDate, parseDate, getLocalTimeZone } from '@internationalized/date';
 
 	import { user } from '$lib/stores/auth.svelte';
-	import { addAppointment } from '$lib/tables/appointments';
 	import { addPatient } from '$lib/tables/patients';
+	import { saveAppointmentCheckoutDraft } from '$lib/utils/appointmentCheckout';
 
 	import Icon from '@iconify/svelte';
 	import SlotSelector from '$lib/components/SlotSelector.svelte';
@@ -203,7 +203,7 @@
 		console.log('Validation successful!', result.data);
 
 		try {
-			const appointment = await addAppointment({
+			saveAppointmentCheckoutDraft({
 				userId: user.user.$id,
 				appointmentSlot: selectedSlot,
 				appointmentDatetime: selectedDate.toLocaleDateString('en-US'),
@@ -220,8 +220,7 @@
 				guardianRelation: bookingForSelf ? null : guardian.relation
 			});
 
-			// toast.success('Appointment booked successfully!');
-			goto(`/appointments/checkout?appointmentId=${appointment.$id}&userId=${user.user.$id}`);
+			goto(`/appointments/checkout?userId=${user.user.$id}`);
 		} catch (error) {
 			console.error(error);
 			toast.error('An error occurred while booking the appointment.');

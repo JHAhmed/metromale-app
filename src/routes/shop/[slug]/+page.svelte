@@ -9,7 +9,7 @@
 	import { fade } from 'svelte/transition';
 
 	let { data } = $props();
-	let product = data.product;
+	let product = $derived(data.product);
 	let images = $state([]);
 
 	let addedToCart = $state(false);
@@ -116,7 +116,7 @@
 					<ul class="space-y-2">
 						{#each product.benefits as benefit}
 							<li class="flex items-start space-x-2 text-gray-700">
-								<Icon icon="ph:check" class="mt-0.5 size-4 flex-shrink-0 text-emerald-500" />
+								<Icon icon="ph:check" class="mt-0.5 size-4 shrink-0 text-emerald-500" />
 								<span>{benefit}</span>
 							</li>
 						{/each}

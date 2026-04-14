@@ -34,13 +34,14 @@
 
 	// Menu options
 	const menu = [
-		{ icon: 'mdi:account', label: 'Profile' },
-		{ icon: 'mdi:translate', label: 'App Language' },
-		{ icon: 'mdi:credit-card-outline', label: 'Payment Management' },
-		{ icon: 'mdi:headphones', label: 'Help and Support' },
-		{ icon: 'mdi:shield-check-outline', label: 'Safety' },
+		{ icon: 'mdi:account', label: 'Profile', href: '/profile' },
+		{ icon: 'mdi:translate', label: 'App Language', href: '/language' },
+		// { icon: 'mdi:credit-card-outline', label: 'Payment Management' },
+		// { icon: 'mdi:headphones', label: 'Help and Support' },
+		// { icon: 'mdi:shield-check-outline', label: 'Safety' },
 		// { icon: 'mdi:share-variant', label: 'Refer and Invite' },
-		{ icon: 'mdi:information-outline', label: 'About Us' }
+		{ icon: 'mdi:information-outline', label: 'About Us', href: '/about' },
+		{ icon: 'mdi:code-slash', label: 'Developer Info', href: '/developer-info' }
 		// { icon: "mdi:logout", label: "Logout", color: "text-red-500" }
 	];
 </script>
@@ -66,7 +67,7 @@
 				{#each menu as item (item.label)}
 					<li>
 						<a
-							href="#"
+							href={item.href}
 							class="group flex items-center rounded-xl px-5 py-4 transition-all hover:bg-sky-50 active:scale-[98%] active:bg-sky-100">
 							<Icon
 								icon={item.icon}

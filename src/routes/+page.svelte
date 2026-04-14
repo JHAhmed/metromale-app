@@ -5,6 +5,7 @@
 	import { getPosts } from '$lib/tables/posts';
 	import { iconMap } from '$lib';
 	import { getLatestUserAppointment } from '$lib/tables/appointments';
+	import { getUserShopOrders } from '$lib/tables/shopOrders';
 	import { onMount } from 'svelte';
 
 	function formatDateTime(dateString, options) {
@@ -90,12 +91,44 @@
 	{/await}
 
 	<div class="flex space-x-4">
-		<div class="w-full rounded-3xl bg-white p-6 shadow-lg/1">
-			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
-				<Icon icon="ph:clipboard-text" class="size-8 text-gray-400" />
-				<h2 class="text-center font-medium text-gray-700">No Orders</h2>
+		{#await getUserShopOrders(user?.user?.$id)}
+			<div class="w-full rounded-3xl bg-white p-6 shadow-lg/1">
+				<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
+					<Icon icon="ph:package" class="size-8 text-gray-400 animate-pulse" />
+					<h2 class="text-center font-medium text-gray-700">Loading orders...</h2>
+				</div>
 			</div>
-		</div>
+		{:then result}
+			{@const latestOrder = result?.rows?.[0]}
+			<button
+				class="w-full rounded-3xl bg-white p-6 shadow-lg/1 transition-transform active:scale-99"
+				onclick={() => goto(latestOrder ? `/shop/orders/${latestOrder.$id}` : '/shop/orders')}>
+				<div class="flex h-32 w-full flex-col items-center justify-center space-y-4">
+					{#if latestOrder}
+						<Icon icon="ph:package" class="size-8 text-amber-500" />
+						<div class="text-center">
+							<h2 class="font-medium text-gray-700">Latest Order</h2>
+							<p class="text-sm text-gray-500">{latestOrder.itemCount} item{latestOrder.itemCount !== 1 ? 's' : ''} · ₹{latestOrder.totalAmount?.toLocaleString()}</p>
+							<p class="mt-1 text-xs capitalize text-gray-400">{latestOrder.status}</p>
+						</div>
+					{:else}
+						<Icon icon="ph:package" class="size-8 text-gray-400" />
+						<h2 class="text-center font-medium text-gray-700">
+							{isAuthenticated.isAuthenticated ? 'No Orders' : 'Login to view Orders'}
+						</h2>
+					{/if}
+				</div>
+			</button>
+		{:catch}
+			<button
+				class="w-full rounded-3xl bg-white p-6 shadow-lg/1"
+				onclick={() => goto('/shop/orders')}>
+				<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
+					<Icon icon="ph:package" class="size-8 text-gray-400" />
+					<h2 class="text-center font-medium text-gray-700">No Orders</h2>
+				</div>
+			</button>
+		{/await}
 
 		<button
 			onclick={() => goto('/appointments/new')}

@@ -1,18 +1,20 @@
 <script>
 	import Icon from '@iconify/svelte';
-	import { isAuthenticated } from '$lib/stores/auth.svelte';
+	import { goto } from '$app/navigation';
+	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
 	import Product from '$lib/components/Product.svelte';
 	import { ViewTypes } from '$lib/enums';
 	import { slide } from 'svelte/transition';
 	import { cart } from '$lib/stores/cart.svelte';
 	import { onMount } from 'svelte';
 	import { getProducts } from '$lib/tables/products.js';
+	import { getUserShopOrders } from '$lib/tables/shopOrders';
 
 	// let { data } = $props();
 
 	let showUpcomingOrders = $state(false);
 	let view = $state(ViewTypes.LIST);
-	let numProducts = $state(4);
+	// let numProducts = $state();
 
 	onMount(() => {
 		if (cart.items?.length > 0) {
@@ -53,17 +55,27 @@
 				{/if}
 			</div>
 
-			<a
-				href="/shop/cart"
-				class="inline-flex w-full items-center justify-center rounded-xl bg-gray-50 p-4 text-center text-sm font-medium text-gray-700 shadow-md/5">
-				Open Cart
-				<Icon icon="ph:arrow-right" class="ml-2 size-5 " />
-			</a>
+				<div class="flex w-full gap-2">
+				<a
+					href="/shop/cart"
+					class="inline-flex flex-1 items-center justify-center rounded-xl bg-gray-50 p-4 text-center text-sm font-medium text-gray-700 shadow-md/5">
+					Open Cart
+					<Icon icon="ph:arrow-right" class="ml-2 size-5 " />
+				</a>
+				<a
+					href="/shop/orders"
+					class="inline-flex flex-1 items-center justify-center rounded-xl bg-gray-50 p-4 text-center text-sm font-medium text-gray-700 shadow-md/5">
+					My Orders
+					<Icon icon="ph:arrow-right" class="ml-2 size-5" />
+				</a>
+			</div>
 		</div>
 	{/if}
+
 	<div class="flex w-full items-center justify-between">
 		<h2 class="text-xl font-semibold text-gray-800">
-			Products <span class="font-light text-gray-600">{numProducts}</span>
+			Products
+			<!-- <span class="font-light text-gray-600">{numProducts}</span> -->
 		</h2>
 		<div class="flex items-center space-x-0.5 rounded-lg bg-gray-50">
 			<!-- View Toggle Buttons -->
@@ -110,4 +122,49 @@
 			</div>
 		{/await}
 	</div>
+
+	<div class="flex w-full items-center justify-between">
+		<h2 class="text-xl font-semibold text-gray-800">Orders</h2>
+		<a href="/shop/orders" class="text-sm font-medium text-amber-600 hover:text-amber-700">View all</a>
+	</div>
+
+	{#await getUserShopOrders(user?.user?.$id)}
+		<div class="rounded-xl border border-dashed border-gray-200 bg-white/50 p-8 text-center">
+			<p class="text-gray-400">Loading orders...</p>
+		</div>
+	{:then orders}
+		{#if orders && orders.total > 0}
+			<div class="space-y-3">
+				{#each orders.rows as order (order.$id)}
+					<button
+						onclick={() => goto(`/shop/orders/${order.$id}`)}
+						class="flex h-20 w-full items-center justify-between rounded-3xl bg-white pl-4 pr-5 shadow-lg/1 transition-transform hover:scale-[1.01] active:scale-[0.99]">
+						<!-- Left: icon + info -->
+						<div class="flex items-center gap-3">
+							<div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+								<Icon icon="ph:package" class="size-6 text-amber-500" />
+							</div>
+							<div class="text-left">
+								<p class="text-sm font-semibold leading-tight text-gray-800">
+									{order.itemCount} item{order.itemCount !== 1 ? 's' : ''} · ₹{order.totalAmount?.toLocaleString()}
+								</p>
+								<p class="mt-0.5 text-xs capitalize text-gray-400">{order.status}</p>
+							</div>
+						</div>
+						<!-- Right: arrow -->
+						<Icon icon="ph:arrow-right-bold" class="size-5 shrink-0 text-gray-400" />
+					</button>
+				{/each}
+			</div>
+		{:else}
+			<div class="rounded-xl border border-dashed border-gray-200 bg-white/50 p-8 text-center">
+				<p class="text-gray-400">No orders yet.</p>
+			</div>
+		{/if}
+	{:catch}
+		<div class="rounded-xl border border-dashed border-gray-200 bg-white/50 p-8 text-center">
+			<p class="text-gray-400">Could not load orders.</p>
+		</div>
+	{/await}
+
 </div>

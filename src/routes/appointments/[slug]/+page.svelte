@@ -6,7 +6,7 @@
 
 	let { data } = $props();
 
-	const { appointment } = data;
+	const { appointment } = $derived(data);
 
 	const statusColors = {
 		pending: 'bg-yellow-100 text-yellow-800',
@@ -44,15 +44,14 @@
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Payment Status -->
-		{#if appointment.status === 'pending'}
+		<!-- {#if appointment.paymentCompleted === false}
 			<div
 				class="flex w-full items-center justify-between rounded-xl border border-dashed border-gray-300 bg-gray-100 p-4">
 				<div class="flex w-full items-center space-x-3">
-					<!-- <Icon icon="ph:clock" class="size-5 text-yellow-600" /> -->
 					<span class="font-medium text-gray-800 capitalize"
 						>Please pay to confirm your appointment!</span>
 
-					{#if appointment.status === 'pending'}
+					{#if appointment.paymentCompleted === false}
 						<div class="ml-auto flex gap-2">
 							<a class="" href="https://rzp.io/rzp/g4fYwzc">
 								<button
@@ -60,16 +59,11 @@
 									Pay Now
 								</button>
 							</a>
-
-							<button
-								class="hover:bg-primary-dark focus:ring-none ml-2 rounded-lg bg-primary px-5 py-3 text-white focus:outline-none active:scale-99 active:opacity-95">
-								Refresh
-							</button>
 						</div>
 					{/if}
 				</div>
 			</div>
-		{/if}
+		{/if} -->
 
 		<!-- Main Details -->
 		<div class="space-y-4">

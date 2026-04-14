@@ -85,7 +85,8 @@
 							? 'bg-white'
 							: 'bg-white/50'} transition-colors hover:bg-white"
 						onclick={() => goTo(i)}
-						aria-label={`Go to slide ${i + 1}`} />
+						aria-label={`Go to slide ${i + 1}`}>
+					</button>
 				{/each}
 			</div>
 		{/if}

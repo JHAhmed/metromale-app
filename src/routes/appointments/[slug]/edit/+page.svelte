@@ -15,7 +15,7 @@
 	import LocationSelector from '$lib/components/LocationSelector.svelte';
 
 	let { data } = $props();
-	const { appointment } = data;
+	const { appointment } = $derived(data);
 
 	// Parse existing date to CalendarDate format
 	function parseExistingDate(dateString) {
@@ -28,10 +28,10 @@
 		}
 	}
 
-	let bookingForSelf = $state(!appointment.guardianName);
-	let selectedLocation = $state(appointment.branch || '');
-	let selectedSlot = $state(appointment.appointmentSlot || '');
-	let selectedDateValue = $state(parseExistingDate(appointment.appointmentDatetime));
+	let bookingForSelf = $derived(!appointment.guardianName);
+	let selectedLocation = $derived(appointment.branch || '');
+	let selectedSlot = $derived(appointment.appointmentSlot || '');
+	let selectedDateValue = $derived(parseExistingDate(appointment.appointmentDatetime));
 	let isSubmitting = $state(false);
 
 	let selectedDate = $derived.by(() => {
@@ -41,7 +41,7 @@
 		return null;
 	});
 
-	let patient = $state({
+	let patient = $derived({
 		name: appointment.patientName || '',
 		age: appointment.patientAge || '',
 		gender: appointment.patientGender || '',
@@ -49,7 +49,7 @@
 		email: appointment.patientEmail || ''
 	});
 
-	let guardian = $state({
+	let guardian = $derived({
 		name: appointment.guardianName || '',
 		age: appointment.guardianAge || '',
 		phone: appointment.guardianPhone || '',
@@ -230,24 +230,27 @@
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">Full Name *</label>
+						<label for="name" class="mb-1 block text-sm font-medium text-gray-700">Full Name *</label>
 						<input
+							name="name"
 							type="text"
 							bind:value={patient.name}
 							placeholder="Enter full name"
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none" />
 					</div>
 					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">Age *</label>
+						<label for="number" class="mb-1 block text-sm font-medium text-gray-700">Age *</label>
 						<input
+							name="number"
 							type="number"
 							bind:value={patient.age}
 							placeholder="Enter age"
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none" />
 					</div>
 					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">Gender *</label>
+						<label for="gender" class="mb-1 block text-sm font-medium text-gray-700">Gender *</label>
 						<select
+							name="gender"
 							bind:value={patient.gender}
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none">
 							<option value="">Select Gender</option>
@@ -257,18 +260,21 @@
 						</select>
 					</div>
 					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700"
+						<label for="phone" class="mb-1 block text-sm font-medium text-gray-700"
 							>Phone {bookingForSelf ? '*' : ''}</label>
 						<input
+							name="phone"
 							type="tel"
 							bind:value={patient.phone}
 							placeholder="e.g., +91 12345 67890"
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none" />
 					</div>
 					<div class="md:col-span-2">
-						<label class="mb-1 block text-sm font-medium text-gray-700"
-							>Email {bookingForSelf ? '*' : ''}</label>
+						<label for="email" class="mb-1 block text-sm font-medium text-gray-700"
+							>Email {bookingForSelf ? '*' : ''}</label
+						>
 						<input
+							name="email"
 							type="email"
 							bind:value={patient.email}
 							placeholder="e.g., patient@example.com"
@@ -299,24 +305,27 @@
 
 						<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div>
-								<label class="mb-1 block text-sm font-medium text-gray-700">Guardian Name *</label>
+								<label for="name" class="mb-1 block text-sm font-medium text-gray-700">Guardian Name *</label>
 								<input
+									name="name"
 									type="text"
 									bind:value={guardian.name}
 									placeholder="Enter guardian name"
 									class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none" />
 							</div>
 							<div>
-								<label class="mb-1 block text-sm font-medium text-gray-700">Guardian Age *</label>
+								<label for="number" class="mb-1 block text-sm font-medium text-gray-700">Guardian Age *</label>
 								<input
+									name="number"
 									type="number"
 									bind:value={guardian.age}
 									placeholder="Enter age"
 									class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none" />
 							</div>
 							<div>
-								<label class="mb-1 block text-sm font-medium text-gray-700">Relation *</label>
+								<label for="relation" class="mb-1 block text-sm font-medium text-gray-700">Relation *</label>
 								<select
+									name="relation"
 									bind:value={guardian.relation}
 									class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none">
 									<option value="">Select Relation</option>
@@ -329,9 +338,10 @@
 							</div>
 							{#if guardian.relation === 'Other'}
 								<div transition:slide>
-									<label class="mb-1 block text-sm font-medium text-gray-700"
+									<label for="otherRelation" class="mb-1 block text-sm font-medium text-gray-700"
 										>Specify Relation *</label>
 									<input
+										name="otherRelation"
 										type="text"
 										bind:value={guardian.otherRelation}
 										placeholder="Specify relation"
@@ -339,16 +349,18 @@
 								</div>
 							{/if}
 							<div>
-								<label class="mb-1 block text-sm font-medium text-gray-700">Phone *</label>
+								<label for="phone" class="mb-1 block text-sm font-medium text-gray-700">Phone *</label>
 								<input
+									name="phone"
 									type="tel"
 									bind:value={guardian.phone}
 									placeholder="e.g., +91 12345 67890"
 									class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none" />
 							</div>
 							<div class="md:col-span-2">
-								<label class="mb-1 block text-sm font-medium text-gray-700">Email *</label>
+								<label for="email" class="mb-1 block text-sm font-medium text-gray-700">Email *</label>
 								<input
+									name="email"
 									type="email"
 									bind:value={guardian.email}
 									placeholder="e.g., guardian@example.com"
