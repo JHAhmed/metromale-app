@@ -2,6 +2,10 @@
 	"appId": "com.metromaleclinic.metromale",
 	"appName": "Metromale",
 	"webDir": "build",
+	"android": {
+		"versionCode": 2,
+		"versionName": "1.0.1"
+	},
 	"server": {
 		"androidScheme": "https",
 		"iosScheme": "appwrite-callback-metromale"
