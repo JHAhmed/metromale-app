@@ -1,5 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { account } from '$lib/appwrite';
 
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
@@ -26,7 +27,7 @@
 			await account.deleteSession('current');
 			isAuthenticated.isAuthenticated = false;
 			user.user = null;
-			goto('/');
+			goto(resolve('/'));
 		} catch (error) {
 			console.error('Logout failed:', error);
 		}
@@ -40,8 +41,8 @@
 		// { icon: 'mdi:headphones', label: 'Help and Support' },
 		// { icon: 'mdi:shield-check-outline', label: 'Safety' },
 		// { icon: 'mdi:share-variant', label: 'Refer and Invite' },
-		{ icon: 'mdi:information-outline', label: 'About Us', href: '/about' },
-		{ icon: 'mdi:code-slash', label: 'Developer Info', href: '/developer-info' }
+		{ icon: 'mdi:information-outline', label: 'About Us', href: '/more/about' },
+		{ icon: 'mdi:code', label: 'Developer Info', href: '/more/developer-info' }
 		// { icon: "mdi:logout", label: "Logout", color: "text-red-500" }
 	];
 </script>
@@ -67,7 +68,7 @@
 				{#each menu as item (item.label)}
 					<li>
 						<a
-							href={item.href}
+							href={resolve(item.href)}
 							class="group flex items-center rounded-xl px-5 py-4 transition-all hover:bg-sky-50 active:scale-[98%] active:bg-sky-100">
 							<Icon
 								icon={item.icon}
@@ -86,7 +87,7 @@
 					<button
 						onclick={handleLogout}
 						class="group flex w-full items-center justify-start rounded-xl bg-red-200 px-5 py-4 text-left transition-all hover:bg-red-300 active:scale-[98%] active:bg-red-400">
-						<Icon icon="mdi:logout" class={'mr-4 size-5 text-red-400 group-hover:text-red-500 '} />
+						<Icon icon="mdi:logout" class="mr-4 size-5 text-red-400 group-hover:text-red-500" />
 						<span class="flex-1 text-base font-medium text-gray-900">Logout</span>
 						<Icon icon="mdi:chevron-right" class="size-5 text-red-300 group-hover:text-red-400" />
 					</button>

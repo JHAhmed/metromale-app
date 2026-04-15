@@ -15,7 +15,7 @@
 
 	const userId = $derived(page.url.searchParams.get('userId'));
 
-	const BOOKING_FEE = 20; // ₹200.00 (amount in paise: 20000)
+	const BOOKING_FEE = 200; // ₹200.00 (amount in paise: 20000)
 	const RAZORPAY_KEY_ID = env.PUBLIC_RAZORPAY_KEY_ID;
 	const FUNCTION_ID = env.PUBLIC_RAZORPAY_FUNCTION_ID;
 
