@@ -64,8 +64,8 @@
 	});
 
 	const locations = $state({
-		OMR: ['2:00 PM - 3:00 PM'],
-		Seliyur: ['2:30 PM - 4:30 PM'],
+		OMR: ['2:00 PM - 4:00 PM'],
+		Seliyur: ['2:00 PM - 4:00 PM'],
 		'T Nagar': ['11:00 AM - 1:00 PM', '5:30 PM - 7:00 PM']
 	});
 
