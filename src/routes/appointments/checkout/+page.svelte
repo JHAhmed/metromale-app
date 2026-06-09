@@ -91,44 +91,41 @@
 			status = 'processing';
 
 			await new Promise((resolve, reject) => {
+				const options = {
+					key: RAZORPAY_KEY_ID,
+					amount: orderData.amount,
+					currency: orderData.currency,
+					name: 'Metromale Clinic',
+					description: 'Appointment Booking Fee',
+					order_id: orderData.orderId,
 
-			const options = {
-				key: RAZORPAY_KEY_ID,
-				amount: orderData.amount,
-				currency: orderData.currency,
-				name: 'Metromale Clinic',
-				description: 'Appointment Booking Fee',
-				order_id: orderData.orderId,
-
-				// ── Add this block ──────────────────────────────────────────────
-				config: {
-					display: {
-					blocks: {
-						upi: {
-						name: 'Pay via UPI',
-						instruments: [
-							{ method: 'upi', flows: ['intent', 'collect', 'qr'] }
-						]
+					// Enable UPI Intent flow inside Capacitor's Android/iOS WebView
+					webview_intent: true,
+					external: {
+						wallets: ['paytm'],
+						handlers: {
+							paymentButton: (response) => {
+								// response.url will be the upi:// intent URL
+								// You can post a message to Capacitor or handle it
+								window.location.href = response.url;
+							}
 						}
 					},
-					sequence: ['block.upi'],
-					preferences: {
-						show_default_blocks: true   // keeps Cards, Netbanking, Wallets too
-					}
-					}
-				},
 
-
-				// const options = {
-				// 	key: RAZORPAY_KEY_ID,
-				// 	amount: orderData.amount,
-				// 	currency: orderData.currency,
-				// 	name: 'Metromale Clinic',
-				// 	description: 'Appointment Booking Fee',
-				// 	order_id: orderData.orderId,
-				// 	prefill: {
-				// 		// You can pre-fill if you have the user's details in store
-				// 	},
+					config: {
+						display: {
+							blocks: {
+								upi: {
+									name: 'Pay via UPI',
+									instruments: [{ method: 'upi', flows: ['intent', 'collect', 'qr'] }]
+								}
+							},
+							sequence: ['block.upi'],
+							preferences: {
+								show_default_blocks: true
+							}
+						}
+					},
 					theme: {
 						color: '#d97706' // amber-600
 					},
@@ -161,9 +158,7 @@
 							);
 
 							if (verifyExecution.responseStatusCode !== 200) {
-								throw new Error(
-									verifyExecution.responseBody || 'Payment verification failed.'
-								);
+								throw new Error(verifyExecution.responseBody || 'Payment verification failed.');
 							}
 
 							const verifyData = JSON.parse(verifyExecution.responseBody);
@@ -200,8 +195,7 @@
 
 				rzp.on('payment.failed', (response) => {
 					status = 'error';
-					errorMessage =
-						response.error?.description || 'Payment failed. Please try again.';
+					errorMessage = response.error?.description || 'Payment failed. Please try again.';
 					toast.error(errorMessage);
 					reject(new Error(errorMessage));
 				});
@@ -229,8 +223,7 @@
 	<button
 		class="mb-2 flex items-center space-x-2 text-gray-600 hover:text-gray-800"
 		disabled={status === 'loading' || status === 'verifying'}
-		onclick={() => goto('/appointments')}
-	>
+		onclick={() => goto('/appointments')}>
 		<Icon icon="ph:arrow-left-bold" class="size-5" />
 		<span class="text-sm font-medium">Back to Appointments</span>
 	</button>
@@ -242,8 +235,7 @@
 				<div
 					class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-amber-100 transition-colors"
 					class:bg-green-100={status === 'success'}
-					class:bg-red-100={status === 'error'}
-				>
+					class:bg-red-100={status === 'error'}>
 					{#if status === 'checking' || status === 'loading' || status === 'verifying'}
 						<Icon icon="ph:spinner" class="size-8 animate-spin text-amber-600" />
 					{:else if status === 'success'}
@@ -328,8 +320,7 @@
 			<!-- Verifying state indicator -->
 			{#if status === 'verifying'}
 				<div
-					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-amber-50 p-4 text-amber-800"
-				>
+					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-amber-50 p-4 text-amber-800">
 					<Icon icon="ph:spinner" class="size-5 animate-spin" />
 					<span class="text-sm font-medium">Verifying your payment with our server…</span>
 				</div>
@@ -338,8 +329,7 @@
 			<!-- Success indicator -->
 			{#if status === 'success'}
 				<div
-					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-green-50 p-4 text-green-800"
-				>
+					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-green-50 p-4 text-green-800">
 					<Icon icon="ph:check-circle" class="size-5" />
 					<span class="text-sm font-medium">Payment verified! Redirecting…</span>
 				</div>
@@ -350,16 +340,14 @@
 				<button
 					id="pay-now-btn"
 					onclick={handlePayNow}
-					class="flex w-full items-center justify-center gap-2 rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]"
-				>
+					class="flex w-full items-center justify-center gap-2 rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99]">
 					<Icon icon="ph:credit-card" class="size-6" />
 					{status === 'error' ? 'Retry Payment' : `Pay ₹${BOOKING_FEE.toFixed(2)}`}
 				</button>
 			{:else if status === 'loading' || status === 'checking'}
 				<button
 					disabled
-					class="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-amber-400 py-4 text-lg font-semibold text-white"
-				>
+					class="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-amber-400 py-4 text-lg font-semibold text-white">
 					<Icon icon="ph:spinner" class="size-6 animate-spin" />
 					Preparing...
 				</button>
@@ -380,7 +368,8 @@
 		<div class="mt-6 text-center">
 			<p class="text-sm text-gray-500">
 				Having trouble with payment?
-				<a href="/contact" class="font-medium text-amber-600 hover:text-amber-700">Contact Support</a>
+				<a href="/contact" class="font-medium text-amber-600 hover:text-amber-700"
+					>Contact Support</a>
 			</p>
 		</div>
 	</div>

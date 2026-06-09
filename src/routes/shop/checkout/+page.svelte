@@ -130,6 +130,7 @@
 						email: customerEmail,
 						contact: customerPhone
 					},
+					webview_intent: true,
 					config: {
 						display: {
 							blocks: {
