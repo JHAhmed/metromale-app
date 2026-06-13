@@ -12,8 +12,7 @@
 	import TopNavbar from '$lib/shared/TopNavbar.svelte';
 
 	// Make sure to import ID from Appwrite!
-	import { account } from '$lib/appwrite';
-	import { ID } from 'appwrite';
+	import { account, ID, messaging } from '$lib/appwrite';
 	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
 	import { storageAdapter } from '$lib/utils/storageAdapter';
@@ -79,7 +78,11 @@
 				const providerId = platform === 'ios' ? APNS_PROVIDER_ID : FCM_PROVIDER_ID;
 
 				// 3. Multi-device fix: Use ID.unique() instead of user.$id
-				await account.createPushTarget(ID.unique(), token.value, providerId);
+				const pushTargetId = ID.unique();
+				await account.createPushTarget(pushTargetId, token.value, providerId);
+
+				await messaging.createSubscriber('all-users', ID.unique(), pushTargetId);
+
 				console.log('Successfully saved target to Appwrite!');
 			} catch (error) {
 				// Appwrite safely throws 409 if this exact token is already saved
