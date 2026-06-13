@@ -55,30 +55,32 @@
 </svelte:head>
 
 <div class="space-y-6 p-4 md:p-8">
-	<div class="overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary via-orange-400 to-amber-300 p-[1px] shadow-xl/5">
+	<div
+		class="overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary via-orange-400 to-amber-300 p-[1px] shadow-xl/5">
 		<div class="rounded-[calc(2rem-1px)] bg-white/95 p-6">
 			<div class="flex items-start gap-4">
 				<div
-					class="flex size-18 shrink-0 items-center justify-center rounded-[1.5rem] bg-primary/10 text-2xl font-semibold text-primary"
-				>
+					class="flex size-18 shrink-0 items-center justify-center rounded-[1.5rem] bg-primary/10 text-2xl font-semibold text-primary">
 					{getInitials(user?.user?.name || 'User')}
 				</div>
 
 				<div class="min-w-0 flex-1">
-					<p class="text-sm font-medium uppercase tracking-[0.2em] text-primary/80">Profile</p>
+					<p class="text-sm font-medium tracking-[0.2em] text-primary/80 uppercase">Profile</p>
 					<h1 class="mt-2 text-2xl font-semibold text-gray-900">
 						{user?.user?.name || 'Metromale Member'}
 					</h1>
-					<p class="mt-1 break-all text-sm text-gray-500">
+					<p class="mt-1 text-sm break-all text-gray-500">
 						{user?.user?.email || 'No email address available'}
 					</p>
 
 					<div class="mt-4 flex flex-wrap gap-2">
-						<span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+						<span
+							class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
 							<span class="size-2 rounded-full bg-emerald-500"></span>
 							{user?.user?.emailVerification ? 'Verified account' : 'Account active'}
 						</span>
-						<span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+						<span
+							class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
 							{getJoinedLabel(user?.user?.$createdAt)}
 						</span>
 					</div>
@@ -87,13 +89,17 @@
 
 			<div class="mt-5 grid gap-3 sm:grid-cols-2">
 				<div class="rounded-2xl bg-orange-50 px-4 py-3">
-					<p class="text-xs font-medium uppercase tracking-[0.15em] text-orange-500">Phone</p>
-					<p class="mt-1 text-sm font-medium text-gray-800">{user?.user?.phone || 'Not added yet'}</p>
+					<p class="text-xs font-medium tracking-[0.15em] text-orange-500 uppercase">Phone</p>
+					<p class="mt-1 text-sm font-medium text-gray-800">
+						{user?.user?.phone || 'Not added yet'}
+					</p>
 				</div>
 
 				<div class="rounded-2xl bg-gray-50 px-4 py-3">
-					<p class="text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Account ID</p>
-					<p class="mt-1 truncate text-sm font-medium text-gray-800">{user?.user?.$id || 'Unavailable'}</p>
+					<p class="text-xs font-medium tracking-[0.15em] text-gray-500 uppercase">Account ID</p>
+					<p class="mt-1 truncate text-sm font-medium text-gray-800">
+						{user?.user?.$id || 'Unavailable'}
+					</p>
 				</div>
 			</div>
 		</div>
@@ -126,6 +132,10 @@
 						Last updated from your appointment history.
 					{:else}
 						Book your first appointment whenever you are ready.
+						<br />
+						Use coupon
+						<span class="font-bold text-orange-600">{user?.user?.$id.slice(-5).toUpperCase()}</span>
+						at the clinic to get 10% off.
 					{/if}
 				</p>
 			{:catch}
@@ -182,7 +192,9 @@
 			<div class="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
 				<div>
 					<p class="text-sm font-medium text-gray-500">Full name</p>
-					<p class="mt-1 text-base font-medium text-gray-900">{user?.user?.name || 'Not available'}</p>
+					<p class="mt-1 text-base font-medium text-gray-900">
+						{user?.user?.name || 'Not available'}
+					</p>
 				</div>
 				<Icon icon="ph:user-circle" class="size-5 shrink-0 text-gray-300" />
 			</div>
@@ -190,7 +202,7 @@
 			<div class="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
 				<div>
 					<p class="text-sm font-medium text-gray-500">Email</p>
-					<p class="mt-1 break-all text-base font-medium text-gray-900">
+					<p class="mt-1 text-base font-medium break-all text-gray-900">
 						{user?.user?.email || 'Not available'}
 					</p>
 				</div>
@@ -200,7 +212,9 @@
 			<div class="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
 				<div>
 					<p class="text-sm font-medium text-gray-500">Phone number</p>
-					<p class="mt-1 text-base font-medium text-gray-900">{user?.user?.phone || 'Not available'}</p>
+					<p class="mt-1 text-base font-medium text-gray-900">
+						{user?.user?.phone || 'Not available'}
+					</p>
 				</div>
 				<Icon icon="ph:phone" class="size-5 shrink-0 text-gray-300" />
 			</div>
@@ -221,16 +235,14 @@
 		{#each quickLinks as item (item.href)}
 			<a
 				href={resolve(item.href)}
-				class="group rounded-3xl bg-white p-5 shadow-lg/1 transition-transform active:scale-[0.98]"
-			>
+				class="group rounded-3xl bg-white p-5 shadow-lg/1 transition-transform active:scale-[0.98]">
 				<div class="flex items-start justify-between gap-4">
 					<div>
 						<h2 class="text-base font-semibold text-gray-900">{item.label}</h2>
 						<p class="mt-2 text-sm text-gray-500">{item.description}</p>
 					</div>
 					<div
-						class="rounded-2xl bg-gray-100 p-3 text-gray-500 transition-colors group-hover:bg-primary/10 group-hover:text-primary"
-					>
+						class="rounded-2xl bg-gray-100 p-3 text-gray-500 transition-colors group-hover:bg-primary/10 group-hover:text-primary">
 						<Icon icon={item.icon} class="size-5" />
 					</div>
 				</div>
@@ -238,4 +250,3 @@
 		{/each}
 	</div>
 </div>
-

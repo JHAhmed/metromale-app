@@ -13,8 +13,9 @@
 	let isRegistering = $state(false);
 
 	let name = $state('');
-	let email = $state('');
+	let identifier = $state('');
 	let password = $state('');
+	let confirmPassword = $state('');
 	let error = $state('');
 
 	async function handleSubmit(e) {
@@ -33,8 +34,14 @@
 	}
 
 	async function signup() {
+		if (password !== confirmPassword) {
+			error = 'Passwords do not match';
+			toast.error(error);
+			return;
+		}
 		try {
-			await account.create('unique()', email, password, name);
+			const loginEmail = identifier.includes('@') ? identifier : `${identifier}@metromale.local`;
+			await account.create('unique()', loginEmail, password, name);
 			await login();
 		} catch (e) {
 			console.error('SIGNUP FAILED:', e);
@@ -45,7 +52,8 @@
 
 	async function login() {
 		try {
-			await account.createEmailPasswordSession(email, password);
+			const loginEmail = identifier.includes('@') ? identifier : `${identifier}@metromale.local`;
+			await account.createEmailPasswordSession(loginEmail, password);
 			isAuthenticated.isAuthenticated = true;
 			const userData = await account.get();
 			user.user = userData;
@@ -77,11 +85,12 @@
 	<Modal text="Logging in..." />
 {/if}
 
-<div class="flex min-h-[80vh] flex-col items-center justify-center p-6 space-y-8">
-
+<div class="flex min-h-[80vh] flex-col items-center justify-center space-y-8 p-6">
 	<div class="flex flex-col items-center space-y-4">
 		<img src={logo} class="size-12 rounded-full" alt="" />
-		<h1 class="text-2xl text-center tracking-tight font-medium text-gray-900">Metromale Clinic & Fertility Center</h1>
+		<h1 class="text-center text-2xl font-medium tracking-tight text-gray-900">
+			Metromale Clinic & Fertility Center
+		</h1>
 	</div>
 
 	{#if !isAuthenticated.isAuthenticated}
@@ -120,35 +129,32 @@
 								bind:value={name}
 								required
 								placeholder="Full Name"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
-							/>
+								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 						</div>
 					</div>
 				{/if}
 
-				<!-- Email Field -->
+				<!-- Email/Phone Field -->
 				<div>
-					<label for="email" class="sr-only block text-sm font-medium text-gray-700">Email</label>
+					<label for="identifier" class="sr-only block text-sm font-medium text-gray-700">Email or Phone</label>
 					<div class="relative">
 						<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-							<Icon icon="ph:envelope-simple" class="size-5 text-gray-400" />
+							<Icon icon="ph:user" class="size-5 text-gray-400" />
 						</span>
 						<input
-							type="email"
-							id="email"
-							bind:value={email}
+							type="text"
+							id="identifier"
+							bind:value={identifier}
 							required
-							placeholder="Email address"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
-						/>
+							placeholder="Email or Phone number"
+							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 					</div>
 				</div>
 
 				<!-- Password Field -->
 				<div>
 					<label for="password" class="sr-only block text-sm font-medium text-gray-700"
-						>Password</label
-					>
+						>Password</label>
 					<div class="relative">
 						<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 							<Icon icon="ph:lock" class="size-5 text-gray-400" />
@@ -159,16 +165,34 @@
 							bind:value={password}
 							required
 							placeholder="Password"
-							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none"
-						/>
+							class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 					</div>
 				</div>
+
+				<!-- Confirm Password Field -->
+				{#if isRegistering}
+					<div>
+						<label for="confirmPassword" class="sr-only block text-sm font-medium text-gray-700"
+							>Confirm Password</label>
+						<div class="relative">
+							<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+								<Icon icon="ph:lock" class="size-5 text-gray-400" />
+							</span>
+							<input
+								type="password"
+								id="confirmPassword"
+								bind:value={confirmPassword}
+								required
+								placeholder="Confirm Password"
+								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
+						</div>
+					</div>
+				{/if}
 
 				<!-- Submit Button -->
 				<button
 					type="submit"
-					class="w-full rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white shadow-sm transition-transform hover:scale-[1.02] hover:bg-orange-500 focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:outline-none"
-				>
+					class="w-full rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white shadow-sm transition-transform hover:scale-[1.02] hover:bg-orange-500 focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:outline-none">
 					{#if isRegistering}
 						Create Account
 					{:else}
@@ -178,24 +202,25 @@
 			</form>
 
 			<!-- Toggle between Login/Register -->
-			<p class="text-center text-sm text-gray-600">
+			<div class="mb-2 flex items-center justify-center text-center text-sm text-gray-600">
 				{#if isRegistering}
-					Already have an account?
+					<p>Already have an account?</p>
 					<button
 						onclick={() => (isRegistering = !isRegistering)}
-						class="font-medium text-orange-400 transition hover:text-orange-500 hover:underline"
-					>
+						class="ml-1 font-medium text-orange-400 transition hover:text-orange-500 hover:underline">
 						Sign In
 					</button>
 				{:else}
-					Don't have an account?
+					<p>Don't have an account?</p>
 					<button
 						onclick={() => (isRegistering = !isRegistering)}
-						class="font-medium text-orange-400 transition hover:text-orange-500 hover:underline"
-					>
+						class="ml-1 font-medium text-orange-400 transition hover:text-orange-500 hover:underline">
 						Register
 					</button>
 				{/if}
+			</div>
+			<p class="text-center text-sm text-gray-600">
+				Go to the <a href="/" class="text-orange-400 hover:underline">home page</a>.
 			</p>
 		</div>
 	{:else}
@@ -203,8 +228,7 @@
 			<h2 class="text-2xl font-bold text-gray-800">You are already logged in!</h2>
 			<button
 				onclick={handleLogout}
-				class="w-full rounded-xl bg-orange-400 px-5 py-3 text-sm font-medium text-white shadow-sm transition-transform hover:scale-[1.02] hover:bg-orange-500 focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:outline-none"
-			>
+				class="w-full rounded-xl bg-orange-400 px-5 py-3 text-sm font-medium text-white shadow-sm transition-transform hover:scale-[1.02] hover:bg-orange-500 focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:outline-none">
 				Logout
 			</button>
 			<p class="mt-2 text-gray-600">
