@@ -28,18 +28,14 @@
 {#if view === ViewTypes.LIST}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
-		onclick={() => goto(`/shop/${product.slug}`)}
+		onclick={() => goto(`/shop/${product.$id}`)}
 		class="flex h-32 items-center justify-start rounded-3xl bg-white text-left shadow-lg/1 transition-transform hover:scale-[1.01] active:scale-[0.99]">
 		{#if product.imageUrls?.[0]}
 			<div class="mr-4 h-full rounded-xl bg-gray-200">
 				{#await getFile(product.imageUrls[0]) then url}
-									
-					<img
-						src={url}
-						class="aspect-square h-full w-full rounded-xl object-cover"
-					alt="" />
-			{/await}
-		</div>
+					<img src={url} class="aspect-square h-full w-full rounded-xl object-cover" alt="" />
+				{/await}
+			</div>
 		{/if}
 
 		<div class="flex flex-col items-start space-y-2 p-2">
@@ -59,7 +55,7 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 
 	<div
-		onclick={() => goto(`/shop/${product.slug}`)}
+		onclick={() => goto(`/shop/${product.$id}`)}
 		class="flex flex-col rounded-3xl bg-white text-left shadow-lg/1 transition-transform hover:scale-[1.01] active:scale-[0.99]">
 		<div class="h-48 w-full rounded-t-3xl bg-gray-200">
 			<img src={image} class="h-full w-full rounded-t-3xl object-cover" alt="" />

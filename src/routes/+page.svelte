@@ -6,23 +6,11 @@
 	import { iconMap } from '$lib';
 	import { getLatestUserAppointment } from '$lib/tables/appointments';
 	import { getUserShopOrders } from '$lib/tables/shopOrders';
-	import { onMount } from 'svelte';
 
 	function formatDateTime(dateString, options) {
 		const date = new Date(dateString);
 		return new Intl.DateTimeFormat('en-GB', options).format(date);
 	}
-
-	onMount(async () => {
-		try {
-			const res = await fetch('https://api.wurks.studio/api/');
-
-			const data = await res.json();
-			console.log(data);
-		} catch (error) {
-			console.log(error);
-		}
-	});
 </script>
 
 <div class="space-y-4 p-4 md:p-8">
@@ -137,10 +125,6 @@
 				<Icon icon="ph:asclepius" class="size-8 text-white" />
 				<h2 class="text-center font-medium text-white">Book Appointment</h2>
 
-				<!-- <button class="mx-auto mt-auto items-center justify-center text-white inline-flex rounded-full">
-					<Icon icon="ph:plus" class="size-8 rounded-full p-0.5 bg-white/50" />
-					<span class="sr-only">Add Appointment</span>
-				</button> -->
 			</div>
 		</button>
 	</div>
@@ -148,18 +132,13 @@
 
 <!-- ─── Latest From Dr. Karthik ────────────────────────────────────────────── -->
 <div class="space-y-4 p-4 md:p-8">
-	<!-- <h2 class="text-lg font-medium text-center text-gray-700">Latest from Dr. Karthik Gunasekaran</h2> -->
 	<h2 class="text-xl font-semibold text-gray-800">Latest from Dr. Karthik Gunasekaran</h2>
 
 	{#await getPosts(2)}
 		<div
 			class="block animate-pulse rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
 			<div class="flex items-center space-x-4">
-				<!-- <Icon icon="ph:headphones" class="size-8 text-amber-500" /> -->
-				<div class="flex flex-col">
-					<!-- <h3 class="font-medium text-gray-700">Podcast: Healthy Habits Q & A</h3>
-					<p class="text-xs text-gray-500">18-min episode • New</p> -->
-				</div>
+				<div class="flex flex-col"></div>
 			</div>
 		</div>
 	{:then products}
@@ -178,38 +157,12 @@
 		{/each}
 	{:catch error}
 		<div
-			class="block animate-pulse rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
+			class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
 			<div class="flex items-center space-x-4">
-				<!-- <Icon icon="ph:headphones" class="size-8 text-amber-500" /> -->
 				<div class="flex flex-col">
-					<!-- <h3 class="font-medium text-gray-700">Podcast: Healthy Habits Q & A</h3>  -->
 					<p class="text-xs text-red-700">Error loading content: {error.message}</p>
 				</div>
 			</div>
 		</div>
 	{/await}
-
-	<!-- <a
-		href="/podcasts/latest"
-		class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
-		<div class="flex items-center space-x-4">
-			<Icon icon="ph:headphones" class="size-8 text-amber-500" />
-			<div class="flex flex-col">
-				<h3 class="font-medium text-gray-700">Podcast: Healthy Habits Q & A</h3>
-				<p class="text-xs text-gray-500">18-min episode • New</p>
-			</div>
-		</div>
-	</a>
-
-	<a
-		href="/podcasts/latest"
-		class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
-		<div class="flex items-center space-x-4">
-			<Icon icon="ph:article" class="size-8 text-emerald-500" />
-			<div class="flex flex-col">
-				<h3 class="font-medium text-gray-700">Understanding Erectile Dysfunction</h3>
-				<p class="text-xs text-gray-500">4-min read • Sep 25</p>
-			</div>
-		</div>
-	</a> -->
 </div>

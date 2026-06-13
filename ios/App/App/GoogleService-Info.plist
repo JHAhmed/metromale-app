@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBGUqmMnF6fRXDVlxm9B3MU6NTvrTT9E78</string>
+	<key>GCM_SENDER_ID</key>
+	<string>933217132273</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.metromaleclinic.metromale</string>
+	<key>PROJECT_ID</key>
+	<string>metromale-clinic-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>metromale-clinic-app.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:933217132273:ios:220394d7cb2fe016399350</string>
+</dict>
+</plist>

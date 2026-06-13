@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ params, fetch }) {
 	const { slug } = params;
-	const queries = [Query.equal('slug', slug)];
+	const queries = [Query.equal('$id', slug)];
 
 	// 2. Fetch data for this specific slug from your CMS
 	// const response = await fetch(`https://cms.wurks.studio/products/${slug}`);

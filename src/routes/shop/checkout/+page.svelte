@@ -12,6 +12,7 @@
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte.js';
 	import { storageAdapter } from '$lib/utils/storageAdapter';
 	import { getFile } from '$lib/utils/getFile';
+	import { dev } from '$app/environment';
 
 	const RAZORPAY_KEY_ID = env.PUBLIC_RAZORPAY_KEY_ID;
 	const FUNCTION_ID = env.PUBLIC_RAZORPAY_FUNCTION_ID;
@@ -57,12 +58,13 @@
 		cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 	);
 	let tax = $derived(subtotal * 0); // GST disabled for now
-	let total = $derived(subtotal + tax);
+	const DELIVERY_FEE = dev ? 0 : 460;
+	let total = $derived(subtotal + tax + DELIVERY_FEE);
 
 	let formValid = $derived(
 		customerName.trim().length > 0 &&
-		customerEmail.trim().length > 0 &&
-		shippingAddress.trim().length > 0
+			customerEmail.trim().length > 0 &&
+			shippingAddress.trim().length > 0
 	);
 
 	async function handlePayNow() {
@@ -136,9 +138,7 @@
 							blocks: {
 								upi: {
 									name: 'Pay via UPI',
-									instruments: [
-										{ method: 'upi', flows: ['intent', 'collect', 'qr'] }
-									]
+									instruments: [{ method: 'upi', flows: ['intent', 'collect', 'qr'] }]
 								}
 							},
 							sequence: ['block.upi'],
@@ -193,9 +193,7 @@
 							);
 
 							if (verifyExecution.responseStatusCode !== 200) {
-								throw new Error(
-									verifyExecution.responseBody || 'Payment verification failed.'
-								);
+								throw new Error(verifyExecution.responseBody || 'Payment verification failed.');
 							}
 
 							const verifyData = JSON.parse(verifyExecution.responseBody);
@@ -260,8 +258,7 @@
 	<button
 		class="mb-2 flex items-center space-x-2 text-gray-600 hover:text-gray-800"
 		disabled={status === 'loading' || status === 'verifying'}
-		onclick={() => goto('/shop/cart')}
-	>
+		onclick={() => goto('/shop/cart')}>
 		<Icon icon="ph:arrow-left-bold" class="size-5" />
 		<span class="text-sm font-medium">Back to Cart</span>
 	</button>
@@ -273,8 +270,7 @@
 				<div
 					class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-amber-100 transition-colors"
 					class:bg-green-100={status === 'success'}
-					class:bg-red-100={status === 'error'}
-				>
+					class:bg-red-100={status === 'error'}>
 					{#if status === 'loading' || status === 'verifying'}
 						<Icon icon="ph:spinner" class="size-8 animate-spin text-amber-600" />
 					{:else if status === 'success'}
@@ -320,47 +316,48 @@
 					</h2>
 					<div class="space-y-4">
 						<div>
-							<label for="customerName" class="mb-1 block text-sm font-medium text-gray-700">Full Name *</label>
+							<label for="customerName" class="mb-1 block text-sm font-medium text-gray-700"
+								>Full Name *</label>
 							<input
 								id="customerName"
 								type="text"
 								bind:value={customerName}
 								disabled={status !== 'idle' && status !== 'error'}
 								placeholder="Your full name"
-								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition-colors focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
-							/>
+								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50" />
 						</div>
 						<div>
-							<label for="customerEmail" class="mb-1 block text-sm font-medium text-gray-700">Email *</label>
+							<label for="customerEmail" class="mb-1 block text-sm font-medium text-gray-700"
+								>Email *</label>
 							<input
 								id="customerEmail"
 								type="email"
 								bind:value={customerEmail}
 								disabled={status !== 'idle' && status !== 'error'}
 								placeholder="your@email.com"
-								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition-colors focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
-							/>
+								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50" />
 						</div>
 						<div>
-							<label for="customerPhone" class="mb-1 block text-sm font-medium text-gray-700">Phone</label>
+							<label for="customerPhone" class="mb-1 block text-sm font-medium text-gray-700"
+								>Phone</label>
 							<input
 								id="customerPhone"
 								type="tel"
 								bind:value={customerPhone}
 								disabled={status !== 'idle' && status !== 'error'}
 								placeholder="Your phone number"
-								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition-colors focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
-							/>
+								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50" />
 						</div>
 						<div>
-							<label for="shippingAddress" class="mb-1 block text-sm font-medium text-gray-700">Shipping Address *</label>
+							<label for="shippingAddress" class="mb-1 block text-sm font-medium text-gray-700"
+								>Shipping Address *</label>
 							<textarea
 								id="shippingAddress"
 								bind:value={shippingAddress}
 								disabled={status !== 'idle' && status !== 'error'}
 								placeholder="Full address including city, state, and PIN code"
 								rows="3"
-								class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition-colors focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
+								class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
 							></textarea>
 						</div>
 					</div>
@@ -376,11 +373,7 @@
 								{#if item.product.imageUrls?.[0]}
 									<div class="size-10 shrink-0 overflow-hidden rounded-lg bg-gray-200">
 										{#await getFile(item.product.imageUrls?.[0]) then imageUrl}
-											<img
-												src={imageUrl}
-												alt={item.product.name}
-												class="size-full object-cover"
-											/>
+											<img src={imageUrl} alt={item.product.name} class="size-full object-cover" />
 										{/await}
 									</div>
 								{/if}
@@ -404,7 +397,8 @@
 				<h2 class="mb-4 text-lg font-semibold text-gray-800">Order Summary</h2>
 				<div class="space-y-3">
 					<div class="flex items-center justify-between">
-						<span class="text-gray-600">Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
+						<span class="text-gray-600"
+							>Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
 						<span class="font-medium text-gray-800">₹{subtotal.toLocaleString()}</span>
 					</div>
 					{#if tax > 0}
@@ -413,6 +407,10 @@
 							<span class="font-medium text-gray-800">₹{tax.toFixed(2)}</span>
 						</div>
 					{/if}
+					<div class="flex items-center justify-between">
+						<span class="text-gray-600">Delivery Fee</span>
+						<span class="font-medium text-gray-800">₹{DELIVERY_FEE.toLocaleString()}</span>
+					</div>
 					<hr class="border-gray-200" />
 					<div class="flex items-center justify-between text-lg">
 						<span class="font-semibold text-gray-800">Total</span>
@@ -424,8 +422,7 @@
 			<!-- Verifying state indicator -->
 			{#if status === 'verifying'}
 				<div
-					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-amber-50 p-4 text-amber-800"
-				>
+					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-amber-50 p-4 text-amber-800">
 					<Icon icon="ph:spinner" class="size-5 animate-spin" />
 					<span class="text-sm font-medium">Verifying your payment with our server…</span>
 				</div>
@@ -434,8 +431,7 @@
 			<!-- Success indicator -->
 			{#if status === 'success'}
 				<div
-					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-green-50 p-4 text-green-800"
-				>
+					class="mb-6 flex items-center justify-center gap-3 rounded-2xl bg-green-50 p-4 text-green-800">
 					<Icon icon="ph:check-circle" class="size-5" />
 					<span class="text-sm font-medium">Payment verified! Your order is confirmed.</span>
 				</div>
@@ -447,16 +443,14 @@
 					id="shop-pay-now-btn"
 					onclick={handlePayNow}
 					disabled={!formValid}
-					class="flex w-full items-center justify-center gap-2 rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-400"
-				>
+					class="flex w-full items-center justify-center gap-2 rounded-full bg-amber-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-amber-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-400">
 					<Icon icon="ph:credit-card" class="size-6" />
 					{status === 'error' ? 'Retry Payment' : `Pay ₹${total.toFixed(2)}`}
 				</button>
 			{:else if status === 'loading'}
 				<button
 					disabled
-					class="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-amber-400 py-4 text-lg font-semibold text-white"
-				>
+					class="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-amber-400 py-4 text-lg font-semibold text-white">
 					<Icon icon="ph:spinner" class="size-6 animate-spin" />
 					Preparing...
 				</button>
@@ -477,7 +471,8 @@
 		<div class="mt-6 text-center">
 			<p class="text-sm text-gray-500">
 				Having trouble with payment?
-				<a href="/contact" class="font-medium text-amber-600 hover:text-amber-700">Contact Support</a>
+				<a href="/contact" class="font-medium text-amber-600 hover:text-amber-700"
+					>Contact Support</a>
 			</p>
 		</div>
 	</div>

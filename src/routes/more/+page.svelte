@@ -2,23 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { account } from '$lib/appwrite';
-
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
 	import Icon, { loadIcon } from '@iconify/svelte';
 	import { onMount } from 'svelte';
 
 	onMount(async () => {
-		const icons = [
-			// 'ph:calendar-check-duotone',
-			// 'ph:calendar-check-fill',
-			// 'ph:shopping-cart-duotone',
-			// 'ph:shopping-cart-fill',
-			// 'ph:house-simple-duotone',
-			// 'ph:house-simple-fill',
-			// 'ph:user-circle-duotone',
-			// 'ph:user-circle-fill',
-		];
-
+		const icons = [];
 		await Promise.all(icons.map((i) => loadIcon(i)));
 	});
 
@@ -36,14 +25,8 @@
 	// Menu options
 	const menu = [
 		{ icon: 'mdi:account', label: 'Profile', href: '/profile' },
-		{ icon: 'mdi:translate', label: 'App Language', href: '/language' },
-		// { icon: 'mdi:credit-card-outline', label: 'Payment Management' },
-		// { icon: 'mdi:headphones', label: 'Help and Support' },
-		// { icon: 'mdi:shield-check-outline', label: 'Safety' },
-		// { icon: 'mdi:share-variant', label: 'Refer and Invite' },
 		{ icon: 'mdi:information-outline', label: 'About Us', href: '/more/about' },
 		{ icon: 'mdi:code', label: 'Developer Info', href: '/more/developer-info' }
-		// { icon: "mdi:logout", label: "Logout", color: "text-red-500" }
 	];
 </script>
 
@@ -53,9 +36,6 @@
 		<div
 			class="relative mb-8 flex flex-col items-center rounded-2xl bg-white/75 p-6 shadow-xl/2 backdrop-blur-lg">
 			<div class="flex flex-col items-center gap-2">
-				<!-- <div class="w-16 h-16 rounded-full bg-gradient-to-br from-sky-200 to-emerald-100 flex items-center justify-center text-3xl font-bold text-gray-600 shadow-md">
-                    {user.initials}
-                </div> -->
 				<div class="mt-2 text-lg font-semibold text-gray-900">{user.user.name}</div>
 				<div class="h-px w-full bg-gray-200"></div>
 				<div class="text-sm text-gray-500">{user.user.email}</div>

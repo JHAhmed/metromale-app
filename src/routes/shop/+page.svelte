@@ -37,16 +37,14 @@
 		</button>
 	</div>
 
-	{#if showUpcomingOrders}
+	{#if isAuthenticated.isAuthenticated && showUpcomingOrders}
 		<div
 			transition:slide
 			class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1">
 			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
 				{#if cart.items.length === 0}
 					<Icon icon="ph:shopping-cart" class="size-8 text-gray-400" />
-					<h2 class="text-center font-medium text-gray-700">
-						{isAuthenticated.isAuthenticated ? 'No Upcoming Orders' : 'Login to view orders'}
-					</h2>
+					<h2 class="text-center font-medium text-gray-700">No Upcoming Orders</h2>
 				{:else}
 					<Icon icon="ph:package" class="size-8 text-gray-400" />
 					<h2 class="text-center font-medium text-gray-700">
@@ -123,6 +121,7 @@
 		{/await}
 	</div>
 
+	{#if isAuthenticated.isAuthenticated}
 	<div class="flex w-full items-center justify-between">
 		<h2 class="text-xl font-semibold text-gray-800">Orders</h2>
 		<a href="/shop/orders" class="text-sm font-medium text-amber-600 hover:text-amber-700">View all</a>
@@ -166,5 +165,6 @@
 			<p class="text-gray-400">Could not load orders.</p>
 		</div>
 	{/await}
+	{/if}
 
 </div>

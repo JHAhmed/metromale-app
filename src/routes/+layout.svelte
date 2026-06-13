@@ -20,6 +20,7 @@
 
 	let name = $derived(user?.user?.name || 'User');
 	const publicRoutes = ['/auth/login', '/'];
+	const publicPrefixes = ['/shop', '/content', '/more/about'];
 
 	async function initPush() {
 		// Check/request permissions
@@ -64,17 +65,19 @@
 	}
 
 	onMount(async () => {
-		if (!isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)) {
+		const isPublic = publicRoutes.includes(page.url.pathname) || publicPrefixes.some(p => page.url.pathname.startsWith(p));
+		if (!isAuthenticated.isAuthenticated && !isPublic) {
 			goto('/auth/login');
 		}
 	});
 
 	$effect(() => {
-		if (!isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)) {
+		const isPublic = publicRoutes.includes(page.url.pathname) || publicPrefixes.some(p => page.url.pathname.startsWith(p));
+		if (!isAuthenticated.isAuthenticated && !isPublic) {
 			goto('/auth/login');
 		}
 
-		if (user?.isAuthenticated) {
+		if (isAuthenticated?.isAuthenticated) {
 			initPush();
 		}
 	});
@@ -91,7 +94,7 @@
 		<TopNavbar {name} isAuth={isAuthenticated.isAuthenticated} />
 	{/key}
 
-	{#if !isAuthenticated.isAuthenticated && !publicRoutes.includes(page.url.pathname)}
+	{#if !isAuthenticated.isAuthenticated && !(publicRoutes.includes(page.url.pathname) || publicPrefixes.some(p => page.url.pathname.startsWith(p)))}
 		<Modal />
 	{:else}
 		{#key page.url.pathname}

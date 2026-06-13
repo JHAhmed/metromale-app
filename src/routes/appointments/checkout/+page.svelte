@@ -302,9 +302,10 @@
 						<hr class="border-gray-200" />
 					{/if}
 					<div class="flex items-center justify-between">
-						<span class="text-gray-600">Consultation Fee</span>
+						<span class="text-gray-600">Booking Fee</span>
 						<span class="font-medium text-gray-800">₹{BOOKING_FEE.toFixed(2)}</span>
 					</div>
+					<p class="text-xs text-gray-500">This amount will be deducted from the final consultation fee.</p>
 					<div class="flex items-center justify-between">
 						<span class="text-gray-600">Tax</span>
 						<span class="font-medium text-gray-800">₹0.00</span>

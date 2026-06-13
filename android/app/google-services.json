@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933217132273",
+    "project_id": "metromale-clinic-app",
+    "storage_bucket": "metromale-clinic-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933217132273:android:0b902a0ac0f1dc92399350",
+        "android_client_info": {
+          "package_name": "com.metromaleclinic.metromale"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRPOfDcAHnsMqcFapmStWLXIw0zcol3oY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

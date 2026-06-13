@@ -7,6 +7,7 @@
 	import { cart } from '$lib/stores/cart.svelte';
 	import { storageAdapter } from '$lib/utils/storageAdapter.js';
 	import { fade } from 'svelte/transition';
+	import { user } from '$lib/stores/auth.svelte.js';
 
 	let { data } = $props();
 	let product = $derived(data.product);
@@ -146,21 +147,28 @@
 				</div>
 			{/if}
 
-			{#if !addedToCart}
-				<button
-					
-					onclick={addToCart}
-					class="inline-flex w-full grow items-center justify-center rounded-full bg-primary py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-primary/90 active:scale-[0.99] active:bg-primary/90">
-					Add to Cart
-					<Icon icon="ph:shopping-cart-simple-bold" class="ml-2 size-5" />
-				</button>
+			{#if user.user}
+				{#if !addedToCart}
+					<button
+						onclick={addToCart}
+						class="inline-flex w-full grow items-center justify-center rounded-full bg-primary py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-primary/90 active:scale-[0.99] active:bg-primary/90">
+						Add to Cart
+						<Icon icon="ph:shopping-cart-simple-bold" class="ml-2 size-5" />
+					</button>
+				{:else}
+					<button
+						transition:fade
+						onclick={() => goto('/shop/cart')}
+						class="inline-flex w-full grow items-center justify-center rounded-full bg-emerald-600 py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-emerald-700 active:scale-[0.99] active:bg-emerald-800">
+						Added to Cart - View Cart
+						<Icon icon="ph:check-bold" class="ml-2 size-5" />
+					</button>
+				{/if}
 			{:else}
 				<button
-					transition:fade
-					onclick={() => goto('/shop/cart')}
-					class="inline-flex w-full grow items-center justify-center rounded-full bg-emerald-600 py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-emerald-700 active:scale-[0.99] active:bg-emerald-800">
-					Added to Cart - View Cart
-					<Icon icon="ph:check-bold" class="ml-2 size-5" />
+					onclick={() => goto('/auth/login')}
+					class="inline-flex w-full grow items-center justify-center rounded-full bg-primary py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-primary/90 active:scale-[0.99] active:bg-primary/90">
+					Log in to buy
 				</button>
 			{/if}
 

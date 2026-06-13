@@ -12,6 +12,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 
 let isNativeReady = false;
 const publicRoutes = ['/', '/auth/login', '/auth/register', '/about'];
+const publicPrefixes = ['/shop', '/content', '/more/about'];
 
 export async function load({ url }) {
 
@@ -49,7 +50,8 @@ export async function load({ url }) {
 
 		} else {
 			user.user = null;
-			if (!publicRoutes.includes(url.pathname)) {
+			const isPublic = publicRoutes.includes(url.pathname) || publicPrefixes.some(p => url.pathname.startsWith(p));
+			if (!isPublic) {
 				goto('/auth/login');
 				return {};
 			}
