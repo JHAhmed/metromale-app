@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ params, fetch }) {
 
-    const queries = [Query.equal('isPublished', true), Query.orderDesc('$createdAt')];
+    const queries = [Query.equal('isPublished', true), Query.orderDesc('$createdAt'), Query.equal('type', ['blog', 'podcast', 'video'])];
 
     try {
         const res = await tablesDB.listRows({

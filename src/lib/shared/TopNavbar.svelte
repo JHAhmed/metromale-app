@@ -33,7 +33,7 @@
 
 		const orders = await tablesDB.listRows({
 			databaseId: 'metromale',
-			tableId: 'orders',
+			tableId: 'shop_orders',
 			queries: [
 				Query.equal('status', ['pending', 'shipped']),
 				Query.equal('userId', user?.user.$id)

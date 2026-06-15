@@ -498,7 +498,7 @@
 		<div class="mt-6 text-center">
 			<p class="text-sm text-gray-500">
 				Having trouble with payment?
-				<a href="/contact" class="font-medium text-amber-600 hover:text-amber-700"
+				<a href="https://www.metromaleclinic.com/contact-us/" class="font-medium text-amber-600 hover:text-amber-700"
 					>Contact Support</a>
 			</p>
 		</div>

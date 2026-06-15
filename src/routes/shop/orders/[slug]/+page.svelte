@@ -178,7 +178,7 @@
 			<div class="text-center">
 				<p class="text-sm text-gray-500">
 					Need help with this order?
-					<a href="/contact" class="font-medium text-amber-600 hover:text-amber-700">Contact Support</a>
+					<a href="https://www.metromaleclinic.com/contact-us/" class="font-medium text-amber-600 hover:text-amber-700">Contact Support</a>
 				</p>
 			</div>
 		</div>
