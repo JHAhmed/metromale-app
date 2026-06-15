@@ -52,8 +52,6 @@
 	function openNotifications() {
 		menuOpen = !menuOpen;
 	}
-
-	console.log(page.url.pathname);
 </script>
 
 <nav

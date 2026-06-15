@@ -2,7 +2,7 @@
 
 export const isAuthenticated = $state({ isAuthenticated: false });
 export const user = $state({ user: null });
-export const isLoading = $state({ isLoading: false });
+export const isLoading = $state({ isLoading: true });
 
 // export const kindeClient = $state({ client: null });
 

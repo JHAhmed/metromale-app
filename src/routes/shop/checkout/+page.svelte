@@ -10,6 +10,7 @@
 	import { cart } from '$lib/stores/cart.svelte.js';
 	import { products } from '$lib/stores/products.svelte.js';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte.js';
+	import { hydrateCart, warmProductCatalog } from '$lib/auth/bootstrap.js';
 	import { storageAdapter } from '$lib/utils/storageAdapter';
 	import { getFile } from '$lib/utils/getFile';
 	import { dev } from '$app/environment';
@@ -26,13 +27,36 @@
 	let customerEmail = $state('');
 	let customerPhone = $state('');
 	let shippingAddress = $state('');
+	let razorpayScriptPromise = null;
+
+	function loadRazorpayCheckout() {
+		if (window.Razorpay) return Promise.resolve();
+		if (razorpayScriptPromise) return razorpayScriptPromise;
+
+		razorpayScriptPromise = new Promise((resolve, reject) => {
+			const script = document.createElement('script');
+			script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+			script.async = true;
+			script.onload = resolve;
+			script.onerror = () => reject(new Error('Unable to load Razorpay checkout.'));
+			document.head.appendChild(script);
+		});
+
+		return razorpayScriptPromise;
+	}
 
 	// Pre-fill from user data
-	onMount(() => {
+	onMount(async () => {
+		await hydrateCart();
+
 		if (cart.items.length === 0) {
 			toast.info('Your cart is empty. Redirecting to shop…');
 			goto('/shop');
 			return;
+		}
+
+		if (products.items.length === 0) {
+			await warmProductCatalog();
 		}
 
 		if (user.user) {
@@ -81,6 +105,8 @@
 		const totalPaise = Math.round(total * 100);
 
 		try {
+			const razorpayReady = loadRazorpayCheckout();
+
 			// ── Step 1: Create Razorpay order via Appwrite Function ──────────────
 			status = 'loading';
 
@@ -117,6 +143,7 @@
 			}
 
 			// ── Step 2: Open Razorpay checkout modal ──────────────────────────────
+			await razorpayReady;
 			status = 'processing';
 
 			await new Promise((resolve, reject) => {

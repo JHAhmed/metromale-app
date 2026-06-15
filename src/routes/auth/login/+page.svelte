@@ -6,6 +6,7 @@
 	import { account } from '$lib/appwrite';
 	import Modal from '$lib/shared/Modal.svelte';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
+	import { clearAuth, initAuth } from '$lib/auth/bootstrap.js';
 	import { toast, Toaster } from 'svelte-sonner';
 	import Icon from '@iconify/svelte';
 
@@ -54,9 +55,7 @@
 		try {
 			const loginEmail = identifier.includes('@') ? identifier : `${identifier}@metromale.local`;
 			await account.createEmailPasswordSession(loginEmail, password);
-			isAuthenticated.isAuthenticated = true;
-			const userData = await account.get();
-			user.user = userData;
+			await initAuth({ force: true });
 			goto('/');
 			loading = false;
 		} catch (e) {
@@ -69,8 +68,7 @@
 	async function handleLogout() {
 		try {
 			await account.deleteSession('current');
-			isAuthenticated.isAuthenticated = false;
-			user.user = null;
+			clearAuth();
 			goto('/');
 		} catch (error) {
 			console.error('Logout failed:', error);

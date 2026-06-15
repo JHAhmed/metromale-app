@@ -1,70 +1,31 @@
 export const prerender = true;
 export const ssr = false;
 
-import { goto } from '$app/navigation';
-import { account } from '$lib/appwrite.js';
-import { isAuthenticated, user } from '$lib/stores/auth.svelte.js';
-import { cart } from '$lib/stores/cart.svelte.js';
-import { loadProducts } from '$lib/stores/products.svelte.js';
-import { storageAdapter } from '$lib/utils/storageAdapter.js';
+import { browser } from '$app/environment';
+import { initAuth } from '$lib/auth/bootstrap.js';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 let isNativeReady = false;
-const publicRoutes = ['/', '/auth/login', '/auth/register', '/about'];
-const publicPrefixes = ['/shop', '/content', '/more/about'];
 
-export async function load({ url }) {
-
-	if (Capacitor.isNativePlatform() && !isNativeReady) {
+async function setupNativeChrome() {
+	try {
 		await StatusBar.setOverlaysWebView({ overlay: false });
 		await StatusBar.setBackgroundColor({ color: '#ffffff' });
 		await StatusBar.setStyle({ style: Style.Light });
-		isNativeReady = true;
-	}
-
-	let appwriteUser = null;
-
-	try {
-		try {
-			appwriteUser = await account.get();
-		} catch (error) {
-			console.error('Error fetching user:', error);
-		}
-
-		const isAuth = !!appwriteUser?.$id;
-
-		isAuthenticated.isAuthenticated = isAuth;
-
-		if (isAuth) {
-			user.user = appwriteUser;
-
-		try {
-			const storedCart = await storageAdapter.getObject('cart');
-			cart.items = storedCart.items || [];
-			await loadProducts();
-		} catch (error) {
-			console.log('No stored current cart found:', error);
-			await storageAdapter.setObject('cart', cart);
-		}
-
-		} else {
-			user.user = null;
-			const isPublic = publicRoutes.includes(url.pathname) || publicPrefixes.some(p => url.pathname.startsWith(p));
-			if (!isPublic) {
-				goto('/auth/login');
-				return {};
-			}
-		}
 	} catch (e) {
-		isAuthenticated.isAuthenticated = false;
-		user.user = null;
-
-		if (e instanceof Response && e.status >= 300 && e.status <= 399) {
-			throw e; // Re-throw the redirect to SvelteKit
-		}
-		console.error('Auth check failed:', e);
+		console.error('Native chrome setup failed:', e);
 	}
+}
 
+export function load() {
+	if (!browser) return {};
+
+	void initAuth();
+
+	if (Capacitor.isNativePlatform() && !isNativeReady) {
+		isNativeReady = true;
+		void setupNativeChrome();
+	}
 	return {};
 }
