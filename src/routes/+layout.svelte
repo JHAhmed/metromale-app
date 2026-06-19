@@ -82,23 +82,45 @@
 			// Listen for token
 			PushNotifications.addListener('registration', async (token) => {
 				try {
-					console.log(`Token registered for ${platform}:`, token.value);
-
-					// 2. Route to the correct Appwrite Provider
+					const platform = Capacitor.getPlatform();
 					const providerId = platform === 'ios' ? APNS_PROVIDER_ID : FCM_PROVIDER_ID;
+					const storageKey = `pushTarget:${platform}`;
 
-					// 3. Multi-device fix: Use ID.unique() instead of user.$id
+					const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
+
+					// Token unchanged — nothing to do
+					if (stored?.token === token.value) {
+						console.log('Push token unchanged, skipping registration');
+						return;
+					}
+
+					// Token is new or rotated — delete the old target first
+					if (stored?.targetId) {
+						try {
+							await account.deletePushTarget(stored.targetId);
+						} catch (e) {
+							// Ignore if already gone (404)
+							if (e?.code !== 404) console.warn('Failed to delete old target:', e);
+						}
+					}
+
+					// Create fresh target
 					const pushTargetId = ID.unique();
 					await account.createPushTarget(pushTargetId, token.value, providerId);
-
 					await messaging.createSubscriber('all-users', ID.unique(), pushTargetId);
 
-					console.log('Successfully saved target to Appwrite!');
+					// Persist so next launch can compare
+					localStorage.setItem(
+						storageKey,
+						JSON.stringify({
+							targetId: pushTargetId,
+							token: token.value
+						})
+					);
+
+					console.log('Push target registered:', pushTargetId);
 				} catch (error) {
-					// Appwrite safely throws 409 if this exact token is already saved
-					if (error?.code !== 409) {
-						console.error('Token registration failed:', error);
-					}
+					console.error('Token registration failed:', error);
 				}
 			});
 
