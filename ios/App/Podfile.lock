@@ -8,7 +8,7 @@ PODS:
   - CapacitorCordova (7.6.1)
   - CapacitorPreferences (7.0.4):
     - Capacitor
-  - CapacitorPushNotifications (7.0.6):
+  - CapacitorPushNotifications (8.1.1):
     - Capacitor
   - CapacitorStatusBar (7.0.6):
     - Capacitor
@@ -44,7 +44,7 @@ SPEC CHECKSUMS:
   CapacitorBrowser: 6d09f59655e89aede71654ef08b98de55cf032b6
   CapacitorCordova: 6ab7337f25a2c9ce7a3fdc2f249c480f447853e0
   CapacitorPreferences: 69d9991307507aeab8ef8019c10b9babfda0e9ca
-  CapacitorPushNotifications: b8e30637549ce91468b8c4dddbef2657be831f4c
+  CapacitorPushNotifications: ec08d589c226a2c0db7c032ec1bf5b044ec85f8e
   CapacitorStatusBar: 416e9e53fd6397e668d4a181cd2131617d949bd6
 
 PODFILE CHECKSUM: 9e9ca5c296cbf8dcda18e95629d67cc38c83ff7a
