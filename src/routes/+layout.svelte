@@ -46,11 +46,12 @@
 		}
 	}
 	const publicRoutes = ['/auth/login', '/'];
-	const publicPrefixes = ['/shop', '/content', '/more/about'];
+	const publicPrefixes = ['/shop', '/content', '/more'];
 
 	// Define your Provider IDs here (ideally from environment variables)
 	const FCM_PROVIDER_ID = '6a2ce8b90031b8fc38c0';
 	const APNS_PROVIDER_ID = '6a2cef90002b22f92775';
+	let hasMounted = false;
 	let isPublicRoute = $derived(
 		publicRoutes.includes(page.url.pathname) ||
 			publicPrefixes.some((p) => page.url.pathname.startsWith(p))
@@ -151,11 +152,12 @@
 	}
 
 	onMount(async () => {
-		void initAuth();
+		await initAuth();
+		hasMounted = true;
 	});
 
 	$effect(() => {
-		if (isLoading.isLoading) return;
+		if (!hasMounted || isLoading.isLoading) return;
 
 		if (!isAuthenticated.isAuthenticated && !isPublicRoute) {
 			void goto('/auth/login');

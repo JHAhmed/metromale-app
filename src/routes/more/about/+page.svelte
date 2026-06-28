@@ -17,7 +17,7 @@
 		{
 			icon: 'ph:phone-call',
 			title: 'Reach them',
-			description: '+91 97102 04044 · All days 9AM - 9PM'
+			description: '+91 90928 49786 · All days 9AM - 9PM'
 		}
 	];
 
