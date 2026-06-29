@@ -38,7 +38,7 @@
 			<div class="flex flex-col items-center gap-2">
 				<div class="mt-2 text-lg font-semibold text-gray-900">{user.user.name}</div>
 				<div class="h-px w-full bg-gray-200"></div>
-				<div class="text-sm text-gray-500">{user.user.email}</div>
+				<div class="text-sm text-gray-500">{user.user.email || user.user.phone || '-'}</div>
 			</div>
 		</div>
 

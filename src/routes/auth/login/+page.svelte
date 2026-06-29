@@ -1,3 +1,4 @@
+<!-- Remember to change label & placeholder to "Email or Phone Number once Twilio is integrated" -->
 <script>
 	import { goto } from '$app/navigation';
 
@@ -15,7 +16,7 @@
 
 	let loading = $state(false);
 	let isRegistering = $state(false);
-	let loginMethod = $state('otp'); // 'otp' or 'password'
+	let loginMethod = $state('password'); // 'otp' or 'password'
 
 	let isOtpSent = $state(false);
 	let isPhoneOtp = $state(false);
@@ -74,7 +75,7 @@
 
 				const execution = await functions.createExecution(
 					PHONE_OTP_FUNCTION_ID,
-					JSON.stringify({ action: 'send-otp', phone }),
+					JSON.stringify({ action: 'send-otp', phone, isRegistering }),
 					false,
 					'/',
 					ExecutionMethod.POST
@@ -113,7 +114,8 @@
 						action: 'verify-otp',
 						phone: phoneForOtp,
 						code: otp,
-						name: isRegistering ? name : undefined
+						name: isRegistering ? name : undefined,
+						isRegistering
 					}),
 					false,
 					'/',
@@ -236,7 +238,7 @@
 			</div>
 
 			<!-- Tabs for Login Method -->
-			{#if !(loginMethod === 'otp' && isOtpSent)}
+			<!-- {#if !(loginMethod === 'otp' && isOtpSent)}
 				<div class="mb-6 flex space-x-2 rounded-xl bg-gray-100 p-1">
 					<button
 						type="button"
@@ -263,7 +265,7 @@
 						Password
 					</button>
 				</div>
-			{/if}
+			{/if} -->
 
 			<!-- Form Element -->
 			<form onsubmit={handleSubmit} class="space-y-4">
@@ -290,7 +292,7 @@
 					<!-- Email/Phone Field -->
 					<div>
 						<label for="identifier" class="sr-only block text-sm font-medium text-gray-700"
-							>Email or Phone</label>
+							>Email</label>
 						<div class="relative">
 							<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 								<Icon icon="ph:user" class="size-5 text-gray-400" />
@@ -300,7 +302,7 @@
 								id="identifier"
 								bind:value={identifier}
 								required
-								placeholder="Email or Phone number"
+								placeholder="Email"
 								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 						</div>
 					</div>
