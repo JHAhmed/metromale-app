@@ -2,18 +2,24 @@
 	import { goto } from '$app/navigation';
 
 	import logo from '$lib/assets/logo.svg';
-	import { account, ID } from '$lib/appwrite';
+	import { account, ID, functions } from '$lib/appwrite';
+	import { ExecutionMethod } from 'appwrite';
+	import { env } from '$env/dynamic/public';
 	import Modal from '$lib/shared/Modal.svelte';
 	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
 	import { clearAuth, initAuth } from '$lib/auth/bootstrap.js';
 	import { toast, Toaster } from 'svelte-sonner';
 	import Icon from '@iconify/svelte';
 
+	const PHONE_OTP_FUNCTION_ID = '6a42213400132646bc69';
+
 	let loading = $state(false);
 	let isRegistering = $state(false);
 	let loginMethod = $state('otp'); // 'otp' or 'password'
 
 	let isOtpSent = $state(false);
+	let isPhoneOtp = $state(false);
+	let phoneForOtp = $state('');
 	let userId = $state('');
 	let otp = $state('');
 
@@ -49,11 +55,14 @@
 	async function sendOtp() {
 		try {
 			const isEmail = identifier.includes('@');
-			let token;
 
 			if (isEmail) {
-				token = await account.createEmailToken(ID.unique(), identifier);
+				// Email OTP — use Appwrite's built-in email token
+				const token = await account.createEmailToken(ID.unique(), identifier);
+				userId = token.userId;
+				isPhoneOtp = false;
 			} else {
+				// Phone OTP — use our custom Twilio function
 				let phone = identifier;
 				if (!phone.startsWith('+')) {
 					if (/^\d{10}$/.test(phone)) {
@@ -62,10 +71,29 @@
 						phone = `+${phone}`;
 					}
 				}
-				token = await account.createPhoneToken(ID.unique(), phone);
+
+				const execution = await functions.createExecution(
+					PHONE_OTP_FUNCTION_ID,
+					JSON.stringify({ action: 'send-otp', phone }),
+					false,
+					'/',
+					ExecutionMethod.POST
+				);
+
+				const result = JSON.parse(execution.responseBody);
+
+				if (execution.responseStatusCode === 429) {
+					throw new Error(result.error || 'Too many requests. Please wait before trying again.');
+				}
+
+				if (execution.responseStatusCode !== 200 || !result.success) {
+					throw new Error(result.error || 'Failed to send OTP');
+				}
+
+				phoneForOtp = phone;
+				isPhoneOtp = true;
 			}
 
-			userId = token.userId;
 			isOtpSent = true;
 			toast.success('OTP sent successfully');
 		} catch (e) {
@@ -77,13 +105,39 @@
 
 	async function verifyOtp() {
 		try {
-			await account.createSession(userId, otp);
+			if (isPhoneOtp) {
+				// Phone OTP — verify through our custom function
+				const execution = await functions.createExecution(
+					PHONE_OTP_FUNCTION_ID,
+					JSON.stringify({
+						action: 'verify-otp',
+						phone: phoneForOtp,
+						code: otp,
+						name: isRegistering ? name : undefined
+					}),
+					false,
+					'/',
+					ExecutionMethod.POST
+				);
 
-			if (isRegistering && name) {
-				try {
-					await account.updateName(name);
-				} catch (nameError) {
-					console.error('Failed to update name:', nameError);
+				const result = JSON.parse(execution.responseBody);
+
+				if (execution.responseStatusCode !== 200 || !result.success) {
+					throw new Error(result.error || 'Verification failed');
+				}
+
+				// Create Appwrite session using the token from our function
+				await account.createSession(result.userId, result.secret);
+			} else {
+				// Email OTP — use Appwrite's built-in session creation
+				await account.createSession(userId, otp);
+
+				if (isRegistering && name) {
+					try {
+						await account.updateName(name);
+					} catch (nameError) {
+						console.error('Failed to update name:', nameError);
+					}
 				}
 			}
 
@@ -141,7 +195,12 @@
 <Toaster richColors />
 
 {#if loading}
-	<Modal text={loginMethod === 'otp' ? (isOtpSent ? "Verifying..." : "Sending OTP...") : "Logging in..."} />
+	<Modal
+		text={loginMethod === 'otp'
+			? isOtpSent
+				? 'Verifying...'
+				: 'Sending OTP...'
+			: 'Logging in...'} />
 {/if}
 
 <div class="flex min-h-[80vh] flex-col items-center justify-center space-y-8 p-6">
@@ -181,16 +240,26 @@
 				<div class="mb-6 flex space-x-2 rounded-xl bg-gray-100 p-1">
 					<button
 						type="button"
-						class="w-1/2 rounded-lg py-2 text-sm font-medium transition-colors {loginMethod === 'otp' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}"
-						onclick={() => { loginMethod = 'otp'; error = ''; }}
-					>
+						class="w-1/2 rounded-lg py-2 text-sm font-medium transition-colors {loginMethod ===
+						'otp'
+							? 'bg-white text-gray-900 shadow-sm'
+							: 'text-gray-500 hover:text-gray-700'}"
+						onclick={() => {
+							loginMethod = 'otp';
+							error = '';
+						}}>
 						OTP
 					</button>
 					<button
 						type="button"
-						class="w-1/2 rounded-lg py-2 text-sm font-medium transition-colors {loginMethod === 'password' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}"
-						onclick={() => { loginMethod = 'password'; error = ''; }}
-					>
+						class="w-1/2 rounded-lg py-2 text-sm font-medium transition-colors {loginMethod ===
+						'password'
+							? 'bg-white text-gray-900 shadow-sm'
+							: 'text-gray-500 hover:text-gray-700'}"
+						onclick={() => {
+							loginMethod = 'password';
+							error = '';
+						}}>
 						Password
 					</button>
 				</div>
@@ -220,7 +289,8 @@
 
 					<!-- Email/Phone Field -->
 					<div>
-						<label for="identifier" class="sr-only block text-sm font-medium text-gray-700">Email or Phone</label>
+						<label for="identifier" class="sr-only block text-sm font-medium text-gray-700"
+							>Email or Phone</label>
 						<div class="relative">
 							<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 								<Icon icon="ph:user" class="size-5 text-gray-400" />
@@ -260,7 +330,8 @@
 								<label for="confirmPassword" class="sr-only block text-sm font-medium text-gray-700"
 									>Confirm Password</label>
 								<div class="relative">
-									<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+									<span
+										class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 										<Icon icon="ph:lock" class="size-5 text-gray-400" />
 									</span>
 									<input
@@ -288,7 +359,7 @@
 								bind:value={otp}
 								required
 								placeholder="Enter 6-digit OTP"
-								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition tracking-widest focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
+								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm tracking-widest text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 						</div>
 					</div>
 				{/if}
@@ -303,19 +374,22 @@
 						{:else}
 							Sign In
 						{/if}
+					{:else if isOtpSent}
+						Verify OTP
 					{:else}
-						{#if isOtpSent}
-							Verify OTP
-						{:else}
-							Send OTP
-						{/if}
+						Send OTP
 					{/if}
 				</button>
 
 				{#if loginMethod === 'otp' && isOtpSent}
 					<button
 						type="button"
-						onclick={() => { isOtpSent = false; otp = ''; }}
+						onclick={() => {
+							isOtpSent = false;
+							isPhoneOtp = false;
+							phoneForOtp = '';
+							otp = '';
+						}}
 						class="mt-3 w-full rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-sm transition-transform hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none">
 						Change Email / Phone
 					</button>

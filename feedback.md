@@ -1,5 +1,0 @@
-- Change Welcome Back to Hello (in the sign in page, also, on iOS for some reason the sign in page shows up when opening the app for the first time, can we remove that functionality?)
-- Make the fact that the coupon code is visible in the profile more apparently, make it easier to find. Also mention it in the TopBar notifications.
-- The user ID in profile can be moved to the bottom under a subheading like "Developer Info", make is less prominent
-- Phone number in Profile needs to be editable.
-- Change phone number in About Us (Reach Us) to 9092849786
