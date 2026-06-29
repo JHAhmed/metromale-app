@@ -6,6 +6,8 @@
 	import { user } from '$lib/stores/auth.svelte.js';
 	import { account } from '$lib/appwrite';
 	import { toast, Toaster } from 'svelte-sonner';
+	import Popup from '$lib/components/ui/Popup.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 
 	const quickLinks = [
 		{
@@ -27,6 +29,10 @@
 			icon: 'ph:dots-three-outline'
 		}
 	];
+
+	let password = $state('');
+	let showPasswordPopup = $state(false);
+	let passwordExists = $derived(user?.user?.passwordUpdate ? true : false);
 
 	function getInitials(name = '') {
 		return name
@@ -72,6 +78,10 @@
 			return;
 		}
 
+		if (!passwordExists) {
+			await account.updatePassword(password);
+		}
+
 		phoneSaving = true;
 		try {
 			let phone = phoneInput.trim();
@@ -82,7 +92,7 @@
 					phone = `+${phone}`;
 				}
 			}
-			await account.updatePhone(phone, '');
+			await account.updatePhone(phone, password);
 			user.user = await account.get();
 			isEditingPhone = false;
 			toast.success('Phone number updated');
@@ -91,6 +101,7 @@
 			toast.error(e.message || 'Failed to update phone number');
 		} finally {
 			phoneSaving = false;
+			showPasswordPopup = false;
 		}
 	}
 
@@ -103,6 +114,27 @@
 <svelte:head>
 	<title>Profile - Metromale</title>
 </svelte:head>
+
+{#if showPasswordPopup}
+	<Popup>
+		<div class="mb-4 flex flex-col items-start gap-2">
+			<p class="text-sm text-gray-600">
+				{passwordExists ? "Enter" : "Create"} password to update details
+			</p>
+			<Input
+				type="password"
+				bind:value={password}
+				placeholder="Enter your password"
+				label="Password"
+				class="w-full" />
+		</div>
+		<button
+			onclick={() => (savePhone())}
+			class="w-1/2 rounded-full bg-amber-600 py-3 text-sm font-medium text-white shadow-md transition hover:bg-amber-700 active:scale-95">
+			Save
+		</button>
+	</Popup>
+{/if}
 
 <div class="space-y-6 p-4 md:p-8">
 	<div
@@ -151,7 +183,8 @@
 	<!-- Coupon Code Section - Prominent Banner -->
 	{#await getUserAppointments(user?.user?.$id) then appointments}
 		{#if appointments.total === 0}
-			<div class="overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-primary p-[1px] shadow-lg">
+			<div
+				class="overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-primary p-[1px] shadow-lg">
 				<div class="rounded-[calc(1.5rem-1px)] bg-gradient-to-r from-amber-50 to-orange-50 p-5">
 					<div class="flex items-start gap-4">
 						<div class="rounded-2xl bg-amber-100 p-3 text-amber-600">
@@ -159,10 +192,15 @@
 						</div>
 						<div class="min-w-0 flex-1">
 							<p class="text-xs font-bold tracking-[0.2em] text-amber-600 uppercase">Your Coupon</p>
-							<p class="mt-1 text-sm text-gray-600">Show this code at the clinic to get <span class="font-bold text-amber-700">10% off</span> your first appointment!</p>
-							<div class="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 shadow-sm">
+							<p class="mt-1 text-sm text-gray-600">
+								Show this code at the clinic to get <span class="font-bold text-amber-700"
+									>10% off</span> your first appointment!
+							</p>
+							<div
+								class="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 shadow-sm">
 								<Icon icon="ph:ticket" class="size-5 text-amber-500" />
-								<span class="text-xl font-bold tracking-[0.2em] text-amber-700">{user?.user?.$id.slice(-5).toUpperCase()}</span>
+								<span class="text-xl font-bold tracking-[0.2em] text-amber-700"
+									>{user?.user?.$id.slice(-5).toUpperCase()}</span>
 							</div>
 						</div>
 					</div>
@@ -281,16 +319,18 @@
 					{#if isEditingPhone}
 						<div class="mt-2 flex items-center gap-2">
 							<div class="relative flex-1">
-								<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">+91</span>
+								<span
+									class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400"
+									>+91</span>
 								<input
 									type="tel"
 									bind:value={phoneInput}
 									placeholder="10-digit number"
 									maxlength="10"
-									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-12 pr-3 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
+									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pr-3 pl-12 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 							</div>
 							<button
-								onclick={savePhone}
+								onclick={showPasswordPopup = true}
 								disabled={phoneSaving}
 								class="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white transition-transform hover:bg-orange-500 active:scale-95 disabled:opacity-50">
 								{phoneSaving ? '...' : 'Save'}
@@ -354,7 +394,7 @@
 	<div class="rounded-3xl bg-white shadow-lg/1">
 		<button
 			onclick={() => (showDevInfo = !showDevInfo)}
-			class="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-gray-50 rounded-3xl">
+			class="flex w-full items-center justify-between rounded-3xl p-5 text-left transition-colors hover:bg-gray-50">
 			<div class="flex items-center gap-3">
 				<div class="rounded-2xl bg-gray-100 p-3 text-gray-400">
 					<Icon icon="ph:code" class="size-5" />
@@ -364,14 +404,16 @@
 					<p class="text-xs text-gray-400">Technical details for debugging</p>
 				</div>
 			</div>
-			<Icon icon="ph:caret-down" class="size-4 text-gray-400 transition-transform {showDevInfo ? 'rotate-180' : ''}" />
+			<Icon
+				icon="ph:caret-down"
+				class="size-4 text-gray-400 transition-transform {showDevInfo ? 'rotate-180' : ''}" />
 		</button>
 
 		{#if showDevInfo}
-			<div class="border-t border-gray-100 px-5 pb-5 pt-4">
+			<div class="border-t border-gray-100 px-5 pt-4 pb-5">
 				<div class="rounded-2xl bg-gray-50 px-4 py-3">
 					<p class="text-xs font-medium tracking-[0.15em] text-gray-400 uppercase">Account ID</p>
-					<p class="mt-1 truncate text-sm font-mono text-gray-500">
+					<p class="mt-1 truncate font-mono text-sm text-gray-500">
 						{user?.user?.$id || 'Unavailable'}
 					</p>
 				</div>
@@ -379,4 +421,3 @@
 		{/if}
 	</div>
 </div>
-
