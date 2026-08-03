@@ -17,6 +17,7 @@
 	} from '$lib/utils/deepLinks.js';
 	import { checkForAppUpdate } from '$lib/utils/appUpdate.js';
 	import AppUpdatePrompt from '$lib/components/AppUpdatePrompt.svelte';
+	import AlertPost from '$lib/components/AlertPost.svelte';
 
 	import Modal from '$lib/shared/Modal.svelte';
 	import Navbar from '$lib/shared/Navbar.svelte';
@@ -28,6 +29,7 @@
 	import { fade } from 'svelte/transition';
 	import Popup from '$lib/components/ui/Popup.svelte';
 	import { getUserAppointments } from '$lib/tables/appointments';
+	import { getLatestPublishedAlert } from '$lib/tables/posts.js';
 	let { children } = $props();
 
 	let name = $derived(user.user?.name || 'User');
@@ -36,6 +38,7 @@
 	let pushInitialized = false;
 	let discountCheckedForUserId = null;
 	let appUpdate = $state(null);
+	let alertPost = $state(null);
 
 	async function checkNewUserDiscount(userId) {
 		const storageKey = `hasSeenDiscountPopup:${userId}`;
@@ -167,6 +170,10 @@
 		hasMounted = true;
 	});
 
+	onMount(async () => {
+		alertPost = await getLatestPublishedAlert();
+	});
+
 	async function handleAppLink(url) {
 		const internalPath = getInternalPathFromAppLink(url);
 		if (!internalPath) return;
@@ -296,6 +303,8 @@
 		update={appUpdate}
 		onUpdate={openAppStore}
 		onDismiss={() => (appUpdate = null)} />
+
+	<AlertPost post={alertPost} onClose={() => (alertPost = null)} />
 </div>
 
 <style>

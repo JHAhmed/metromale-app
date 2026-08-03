@@ -11,6 +11,11 @@
 		const date = new Date(dateString);
 		return new Intl.DateTimeFormat('en-GB', options).format(date);
 	}
+
+	function navigate() {
+		const url = 'https://api.whatsapp.com/send?phone=917358011181&text=Hi%20I%20have%20an%20inquiry%20about%20Metromale!';
+		window.open(url, '_blank');
+	}
 </script>
 
 <div class="space-y-4 p-4 md:p-8">
@@ -118,15 +123,24 @@
 			</button>
 		{/await}
 
-		<button
-			onclick={() => goto('/appointments/new')}
-			class="w-full rounded-3xl bg-red-400 p-6 shadow-lg/1 transition-transform active:scale-99 active:bg-red-500">
-			<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
-				<Icon icon="ph:asclepius" class="size-8 text-white" />
-				<h2 class="text-center font-medium text-white">Book Appointment</h2>
-
-			</div>
-		</button>
+		<div class="w-full space-y-4">
+			<button
+				onclick={() => goto('/appointments/new')}
+				class="w-full rounded-3xl bg-red-400 p-4 shadow-lg/1 transition-transform active:scale-99 active:bg-red-500">
+				<div class="flex h-16 w-full  items-center justify-center space-x-3">
+					<Icon icon="ph:asclepius" class="size-6 text-white" />
+					<h2 class="text-center font-medium text-white">Book Appointment</h2>
+				</div>
+			</button>
+			<button
+				onclick={() => navigate()}
+				class="w-full rounded-3xl bg-green-500 p-4 shadow-lg/1 transition-transform active:scale-99 active:bg-green-600">
+				<div class="flex h-16 w-full  items-center justify-center space-x-3">
+					<Icon icon="simple-icons:whatsapp" class="size-6 text-white" />
+					<h2 class="text-center font-medium text-white">WhatsApp</h2>
+				</div>
+			</button>
+		</div>
 	</div>
 </div>
 
