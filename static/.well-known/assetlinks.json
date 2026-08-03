@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.metromaleclinic.metromale",
+      "sha256_cert_fingerprints": ["99:9B:B7:80:92:44:17:98:E6:DD:B8:60:3C:AC:0C:06:1D:C3:EA:9E:E2:86:22:48:72:3D:8C:5D:F9:FC:38:F3"]
+    }
+  }
+]

@@ -82,13 +82,25 @@
 		cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 	);
 	let tax = $derived(subtotal * 0); // GST disabled for now
-	const DELIVERY_FEE = dev ? 0 : 460;
-	let total = $derived(subtotal + tax + DELIVERY_FEE);
+	let deliveryRegion = $state('');
+	const deliveryRegions = [
+		{ value: 'chennai', label: 'Within Chennai (₹35)', fee: 35 },
+		{ value: 'tamilnadu', label: 'Within Tamil Nadu (₹65)', fee: 65 },
+		{ value: 'southindia', label: 'Within South India (₹75)', fee: 75 },
+		{ value: 'majorcities', label: 'Mumbai, Delhi, Kolkata, Ahmedabad (₹90)', fee: 90 },
+		{ value: 'restofindia', label: 'Rest of India (₹100)', fee: 100 }
+	];
+	let deliveryFee = $derived.by(() => {
+		const region = deliveryRegions.find((r) => r.value === deliveryRegion);
+		return region ? region.fee : 0;
+	});
+	let total = $derived(subtotal + tax + deliveryFee);
 
 	let formValid = $derived(
 		customerName.trim().length > 0 &&
 			customerEmail.trim().length > 0 &&
-			shippingAddress.trim().length > 0
+			shippingAddress.trim().length > 0 &&
+			deliveryRegion !== ''
 	);
 
 	async function handlePayNow() {
@@ -387,6 +399,21 @@
 								class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
 							></textarea>
 						</div>
+						<div>
+							<label for="deliveryRegion" class="mb-1 block text-sm font-medium text-gray-700"
+								>Delivery Region *</label>
+							<select
+								id="deliveryRegion"
+								bind:value={deliveryRegion}
+								disabled={status !== 'idle' && status !== 'error'}
+								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 disabled:opacity-50"
+								required>
+								<option value="">Select Delivery Region</option>
+								{#each deliveryRegions as region}
+									<option value={region.value}>{region.label}</option>
+								{/each}
+							</select>
+						</div>
 					</div>
 				</div>
 			{/if}
@@ -436,7 +463,13 @@
 					{/if}
 					<div class="flex items-center justify-between">
 						<span class="text-gray-600">Delivery Fee</span>
-						<span class="font-medium text-gray-800">₹{DELIVERY_FEE.toLocaleString()}</span>
+						<span class="font-medium text-gray-800">
+							{#if deliveryRegion}
+								₹{deliveryFee.toLocaleString()}
+							{:else}
+								<span class="text-xs text-gray-400 font-medium">Select region to calculate</span>
+							{/if}
+						</span>
 					</div>
 					<hr class="border-gray-200" />
 					<div class="flex items-center justify-between text-lg">

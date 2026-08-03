@@ -1,14 +1,15 @@
 <!-- Remember to change label & placeholder to "Email or Phone Number once Twilio is integrated" -->
 <script>
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	import logo from '$lib/assets/logo.svg';
 	import { account, ID, functions } from '$lib/appwrite';
 	import { ExecutionMethod } from 'appwrite';
-	import { env } from '$env/dynamic/public';
 	import Modal from '$lib/shared/Modal.svelte';
-	import { isAuthenticated, user } from '$lib/stores/auth.svelte';
+	import { isAuthenticated } from '$lib/stores/auth.svelte';
 	import { clearAuth, initAuth } from '$lib/auth/bootstrap.js';
+	import { consumePendingDeepLink } from '$lib/utils/deepLinks.js';
 	import { toast, Toaster } from 'svelte-sonner';
 	import Icon from '@iconify/svelte';
 
@@ -16,7 +17,7 @@
 
 	let loading = $state(false);
 	let isRegistering = $state(false);
-	let loginMethod = $state('password'); // 'otp' or 'password'
+	let loginMethod = $state('otp'); // 'otp' or 'password'
 
 	let isOtpSent = $state(false);
 	let isPhoneOtp = $state(false);
@@ -29,6 +30,10 @@
 	let password = $state('');
 	let confirmPassword = $state('');
 	let error = $state('');
+
+	function goAfterLogin() {
+		goto(resolve(consumePendingDeepLink() || '/'));
+	}
 
 	async function handleSubmit(e) {
 		e.preventDefault();
@@ -144,7 +149,7 @@
 			}
 
 			await initAuth({ force: true });
-			goto('/');
+			goAfterLogin();
 		} catch (e) {
 			console.error('OTP VERIFICATION FAILED:', e);
 			error = e.message;
@@ -174,7 +179,7 @@
 			const loginEmail = identifier.includes('@') ? identifier : `${identifier}@metromale.local`;
 			await account.createEmailPasswordSession(loginEmail, password);
 			await initAuth({ force: true });
-			goto('/');
+			goAfterLogin();
 		} catch (e) {
 			console.error('LOGIN FAILED:', e);
 			error = e.message;
@@ -186,7 +191,7 @@
 		try {
 			await account.deleteSession('current');
 			clearAuth();
-			goto('/');
+			goto(resolve('/'));
 		} catch (error) {
 			console.error('Logout failed:', error);
 			toast.error(`Logout failed: ${error}`);
@@ -238,7 +243,7 @@
 			</div>
 
 			<!-- Tabs for Login Method -->
-			<!-- {#if !(loginMethod === 'otp' && isOtpSent)}
+			{#if !(loginMethod === 'otp' && isOtpSent)}
 				<div class="mb-6 flex space-x-2 rounded-xl bg-gray-100 p-1">
 					<button
 						type="button"
@@ -265,7 +270,7 @@
 						Password
 					</button>
 				</div>
-			{/if} -->
+			{/if}
 
 			<!-- Form Element -->
 			<form onsubmit={handleSubmit} class="space-y-4">
@@ -292,7 +297,7 @@
 					<!-- Email/Phone Field -->
 					<div>
 						<label for="identifier" class="sr-only block text-sm font-medium text-gray-700"
-							>Email</label>
+							>Email or Phone</label>
 						<div class="relative">
 							<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 								<Icon icon="ph:user" class="size-5 text-gray-400" />
@@ -302,7 +307,7 @@
 								id="identifier"
 								bind:value={identifier}
 								required
-								placeholder="Email"
+								placeholder="Email or Phone number"
 								class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 pl-10 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 						</div>
 					</div>
@@ -419,7 +424,7 @@
 				</div>
 			{/if}
 			<p class="text-center text-sm text-gray-600">
-				Go to the <a href="/" class="text-orange-400 hover:underline">home page</a>.
+				Go to the <a href={resolve('/')} class="text-orange-400 hover:underline">home page</a>.
 			</p>
 		</div>
 	{:else}
@@ -431,7 +436,7 @@
 				Logout
 			</button>
 			<p class="mt-2 text-gray-600">
-				Go to the <a href="/" class="text-orange-400 hover:underline">home page</a>.
+				Go to the <a href={resolve('/')} class="text-orange-400 hover:underline">home page</a>.
 			</p>
 		</div>
 	{/if}

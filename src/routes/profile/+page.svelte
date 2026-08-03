@@ -7,7 +7,6 @@
 	import { account } from '$lib/appwrite';
 	import { toast, Toaster } from 'svelte-sonner';
 	import Popup from '$lib/components/ui/Popup.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
 
 	const quickLinks = [
 		{
@@ -32,7 +31,12 @@
 
 	let password = $state('');
 	let showPasswordPopup = $state(false);
-	let passwordExists = $derived(user?.user?.passwordUpdate ? true : false);
+	let showEmailSetupPopup = $state(false);
+	let emailInput = $state('');
+	let emailPassword = $state('');
+	let confirmEmailPassword = $state('');
+	let emailSaving = $state(false);
+	let canEditPhone = $derived(Boolean(user?.user?.email));
 
 	function getInitials(name = '') {
 		return name
@@ -63,6 +67,11 @@
 	let phoneSaving = $state(false);
 
 	function startEditPhone() {
+		if (!canEditPhone) {
+			toast.info('Set up email and password login before editing your phone number');
+			return;
+		}
+
 		phoneInput = user?.user?.phone?.replace('+91', '') || '';
 		isEditingPhone = true;
 	}
@@ -78,8 +87,9 @@
 			return;
 		}
 
-		if (!passwordExists) {
-			await account.updatePassword(password);
+		if (!password.trim()) {
+			toast.error('Please enter your password');
+			return;
 		}
 
 		phoneSaving = true;
@@ -92,16 +102,73 @@
 					phone = `+${phone}`;
 				}
 			}
-			await account.updatePhone(phone, password);
+			await account.updatePhone({ phone, password });
 			user.user = await account.get();
 			isEditingPhone = false;
+			closePasswordPopup();
 			toast.success('Phone number updated');
 		} catch (e) {
 			console.error('Failed to update phone:', e);
 			toast.error(e.message || 'Failed to update phone number');
 		} finally {
 			phoneSaving = false;
-			showPasswordPopup = false;
+		}
+	}
+
+	function closePasswordPopup() {
+		showPasswordPopup = false;
+		password = '';
+	}
+
+	function openEmailSetup() {
+		emailInput = '';
+		emailPassword = '';
+		confirmEmailPassword = '';
+		showEmailSetupPopup = true;
+	}
+
+	function closeEmailSetup() {
+		showEmailSetupPopup = false;
+		emailInput = '';
+		emailPassword = '';
+		confirmEmailPassword = '';
+	}
+
+	async function saveEmailSetup() {
+		const email = emailInput.trim();
+		const currentPhone = user?.user?.phone;
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			toast.error('Please enter a valid email address');
+			return;
+		}
+		if (emailPassword.length < 8) {
+			toast.error('Password must be at least 8 characters');
+			return;
+		}
+		if (emailPassword !== confirmEmailPassword) {
+			toast.error('Passwords do not match');
+			return;
+		}
+		if (!currentPhone) {
+			toast.error('We could not find your current phone number');
+			return;
+		}
+
+		emailSaving = true;
+		try {
+			// Phone-registered accounts are created by the OTP function with the
+			// normalized phone number as their initial Appwrite password.
+			await account.updateEmail({ email, password: currentPhone });
+			await account.updatePassword({ password: emailPassword, oldPassword: currentPhone });
+			user.user = await account.get();
+			closeEmailSetup();
+			toast.success('Email and password login set up');
+		} catch (e) {
+			console.error('Failed to set up email login:', e);
+			toast.error(e.message || 'Failed to set up email login');
+		} finally {
+			emailSaving = false;
 		}
 	}
 
@@ -116,23 +183,109 @@
 </svelte:head>
 
 {#if showPasswordPopup}
-	<Popup>
-		<div class="mb-4 flex flex-col items-start gap-2">
-			<p class="text-sm text-gray-600">
-				{passwordExists ? "Enter" : "Create"} password to update details
+	<Popup closeDialog={closePasswordPopup}>
+		<div class="mb-4 flex w-full flex-col items-start gap-2">
+			<p class="text-sm font-medium text-gray-600">
+				Enter your password to update your phone number
 			</p>
-			<Input
+			<label for="phone-update-password" class="sr-only">Password</label>
+			<input
+				id="phone-update-password"
 				type="password"
 				bind:value={password}
+				autocomplete="current-password"
 				placeholder="Enter your password"
-				label="Password"
-				class="w-full" />
+				class="w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-primary focus:ring-0 focus:outline-none" />
 		</div>
-		<button
-			onclick={() => (savePhone())}
-			class="w-1/2 rounded-full bg-amber-600 py-3 text-sm font-medium text-white shadow-md transition hover:bg-amber-700 active:scale-95">
-			Save
-		</button>
+		<div class="flex w-full gap-3">
+			<button
+				onclick={closePasswordPopup}
+				class="w-1/2 rounded-full bg-gray-100 py-3 text-sm font-medium text-gray-600 transition hover:bg-gray-200 active:scale-95">
+				Cancel
+			</button>
+			<button
+				onclick={() => savePhone()}
+				class="w-1/2 rounded-full bg-amber-600 py-3 text-sm font-medium text-white shadow-md transition hover:bg-amber-700 active:scale-95">
+				Save
+			</button>
+		</div>
+	</Popup>
+{/if}
+
+{#if showEmailSetupPopup}
+	<Popup closeDialog={closeEmailSetup}>
+		<form
+			onsubmit={(event) => {
+				event.preventDefault();
+				saveEmailSetup();
+			}}
+			class="w-full">
+			<div class="mb-5">
+				<h2 class="text-lg font-semibold text-gray-900">Set up email login</h2>
+				<p class="mt-1 text-sm text-gray-500">
+					Add an email and password so you can use email login and edit your phone number later.
+				</p>
+			</div>
+
+			<div class="space-y-4">
+				<div>
+					<label for="setup-email" class="mb-1 block text-sm font-medium text-gray-700"
+						>Email</label>
+					<input
+						id="setup-email"
+						type="email"
+						bind:value={emailInput}
+						autocomplete="email"
+						required
+						placeholder="you@example.com"
+						class="w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-primary focus:ring-0 focus:outline-none" />
+				</div>
+
+				<div>
+					<label for="setup-password" class="mb-1 block text-sm font-medium text-gray-700"
+						>Password</label>
+					<input
+						id="setup-password"
+						type="password"
+						bind:value={emailPassword}
+						autocomplete="new-password"
+						minlength="8"
+						required
+						placeholder="At least 8 characters"
+						class="w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-primary focus:ring-0 focus:outline-none" />
+				</div>
+
+				<div>
+					<label for="confirm-setup-password" class="mb-1 block text-sm font-medium text-gray-700"
+						>Confirm password</label>
+					<input
+						id="confirm-setup-password"
+						type="password"
+						bind:value={confirmEmailPassword}
+						autocomplete="new-password"
+						minlength="8"
+						required
+						placeholder="Repeat your password"
+						class="w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-primary focus:ring-0 focus:outline-none" />
+				</div>
+			</div>
+
+			<div class="mt-6 flex w-full gap-3">
+				<button
+					type="button"
+					onclick={closeEmailSetup}
+					disabled={emailSaving}
+					class="w-1/2 rounded-full bg-gray-100 py-3 text-sm font-medium text-gray-600 transition hover:bg-gray-200 active:scale-95 disabled:opacity-50">
+					Cancel
+				</button>
+				<button
+					type="submit"
+					disabled={emailSaving}
+					class="w-1/2 rounded-full bg-primary py-3 text-sm font-medium text-white shadow-md transition hover:bg-orange-500 active:scale-95 disabled:opacity-50">
+					{emailSaving ? 'Setting up...' : 'Set up login'}
+				</button>
+			</div>
+		</form>
 	</Popup>
 {/if}
 
@@ -304,11 +457,23 @@
 			</div>
 
 			<div class="flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
-				<div>
+				<div class="min-w-0 flex-1">
 					<p class="text-sm font-medium text-gray-500">Email</p>
-					<p class="mt-1 text-base font-medium break-all text-gray-900">
-						{user?.user?.email || 'Not available'}
-					</p>
+					{#if user?.user?.email}
+						<p class="mt-1 text-base font-medium break-all text-gray-900">{user.user.email}</p>
+					{:else}
+						<div class="mt-1 flex items-center gap-2">
+							<p class="text-base font-medium text-gray-900">Not set up</p>
+							<button
+								onclick={openEmailSetup}
+								class="rounded-lg bg-primary px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-orange-500 active:scale-95">
+								Set up
+							</button>
+						</div>
+						<p class="mt-1 text-xs text-gray-500">
+							Add email and password login to unlock phone editing.
+						</p>
+					{/if}
 				</div>
 				<Icon icon="ph:envelope-simple" class="size-5 shrink-0 text-gray-300" />
 			</div>
@@ -330,7 +495,7 @@
 									class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pr-3 pl-12 text-sm text-gray-700 transition focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-200 focus:outline-none" />
 							</div>
 							<button
-								onclick={showPasswordPopup = true}
+								onclick={() => (showPasswordPopup = true)}
 								disabled={phoneSaving}
 								class="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white transition-transform hover:bg-orange-500 active:scale-95 disabled:opacity-50">
 								{phoneSaving ? '...' : 'Save'}
@@ -347,13 +512,22 @@
 							<p class="text-base font-medium text-gray-900">
 								{user?.user?.phone || 'Not available'}
 							</p>
-							<button
-								onclick={startEditPhone}
-								class="rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-primary"
-								title="Edit phone number">
-								<Icon icon="ph:pencil-simple" class="size-4" />
-							</button>
+							{#if canEditPhone}
+								<button
+									onclick={startEditPhone}
+									class="rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-primary"
+									title="Edit phone number">
+									<Icon icon="ph:pencil-simple" class="size-4" />
+								</button>
+							{:else}
+								<Icon icon="ph:lock-key" class="size-4 text-gray-300" />
+							{/if}
 						</div>
+						{#if !canEditPhone}
+							<p class="mt-1 text-xs text-gray-500">
+								Editing phone number is disabled until email setup is complete.
+							</p>
+						{/if}
 					{/if}
 				</div>
 				<Icon icon="ph:phone" class="size-5 shrink-0 text-gray-300" />

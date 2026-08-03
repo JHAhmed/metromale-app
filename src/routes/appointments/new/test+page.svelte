@@ -250,7 +250,8 @@
 				guardianAge: bookingForSelf ? null : guardian.age,
 				guardianPhone: bookingForSelf ? null : guardian.phone,
 				guardianEmail: bookingForSelf ? null : guardian.email,
-				guardianRelation: bookingForSelf ? null : guardian.relation
+				guardianRelation: bookingForSelf ? null : guardian.relation,
+				status: 'pending'
 			});
 
 			toast.success('Appointment booked successfully!');

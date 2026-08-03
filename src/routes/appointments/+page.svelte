@@ -91,7 +91,7 @@
                                 <div class="mt-2 flex items-center gap-3 text-gray-700">
                                     <Icon icon="ph:clock" class="h-5 w-5 text-gray-500" />
                                     <span class="font-medium">
-                                        {formatDateTime(next.appointmentDatetime, { timeStyle: 'short' })}
+                                        {next.appointmentSlot}
                                     </span>
                                 </div>
                             </div>

@@ -28,7 +28,12 @@
 					<Icon icon="ph:radio-button" class="size-5 text-gray-400 {selectedLocation === loc
 						? 'text-amber-500'
 						: ''}" />
-					<span class="font-medium text-gray-700">{loc}</span>
+					<div class="flex flex-col">
+						<span class="font-medium text-gray-700">{loc}</span>
+						{#if loc === 'Seliyur'}
+							<span class="text-xs font-semibold text-red-500 mt-0.5">Assistant Doctor Only!</span>
+						{/if}
+					</div>
 				</label>
 			{/each}
 		</div>

@@ -1,6 +1,6 @@
 <script>
 	import Icon from '@iconify/svelte';
-	import DateField from './ui/DateField.svelte';
+	import Calendar from './ui/Calendar.svelte';
 
 	let { selectedDateValue = $bindable() } = $props();
 </script>
@@ -12,7 +12,7 @@
 			<span>Select Date</span>
 		</h2>
 
-        <DateField bind:value={selectedDateValue} />
+        <Calendar bind:value={selectedDateValue} />
 
 		<!-- <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
 			{#each slots as slot}

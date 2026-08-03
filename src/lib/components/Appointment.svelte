@@ -7,9 +7,7 @@
 		return new Intl.DateTimeFormat('en-IN', {
 			weekday: 'short',
 			month: 'short',
-			day: 'numeric',
-			hour: 'numeric',
-			minute: 'numeric'
+			day: 'numeric'
 		}).format(new Date(datetime));
 	};
 
@@ -34,8 +32,12 @@
 
 			<div class="flex items-center space-x-3">
 				<Icon icon="ph:calendar" class="size-5 text-gray-500" />
-				<span class=" text-gray-700"
+				<span class="text-gray-700"
 					>{formatDate(appointment.appointmentDatetime)}</span>
+			</div>
+			<div class="flex items-center space-x-3">
+				<Icon icon="ph:clock" class="size-5 text-gray-500" />
+				<span class="text-gray-700">{appointment.appointmentSlot}</span>
 			</div>
 			<div class="flex items-center space-x-3">
 				<Icon icon="ph:map-pin" class="size-5 text-gray-500" />

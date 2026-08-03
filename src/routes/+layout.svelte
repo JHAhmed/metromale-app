@@ -7,6 +7,16 @@
 	import { initAuth } from '$lib/auth/bootstrap.js';
 	import { PushNotifications } from '@capacitor/push-notifications';
 	import { Capacitor } from '@capacitor/core'; // Added Capacitor core
+	import { App } from '@capacitor/app';
+	import { Browser } from '@capacitor/browser';
+	import { resolve } from '$app/paths';
+	import {
+		getInternalPathFromAppLink,
+		isProtectedDeepLink,
+		PENDING_DEEP_LINK_KEY
+	} from '$lib/utils/deepLinks.js';
+	import { checkForAppUpdate } from '$lib/utils/appUpdate.js';
+	import AppUpdatePrompt from '$lib/components/AppUpdatePrompt.svelte';
 
 	import Modal from '$lib/shared/Modal.svelte';
 	import Navbar from '$lib/shared/Navbar.svelte';
@@ -18,13 +28,14 @@
 	import { fade } from 'svelte/transition';
 	import Popup from '$lib/components/ui/Popup.svelte';
 	import { getUserAppointments } from '$lib/tables/appointments';
-	let { children, data } = $props();
+	let { children } = $props();
 
 	let name = $derived(user.user?.name || 'User');
 	let showDiscountPopup = $state(false);
 	let couponCode = $state('');
 	let pushInitialized = false;
 	let discountCheckedForUserId = null;
+	let appUpdate = $state(null);
 
 	async function checkNewUserDiscount(userId) {
 		const storageKey = `hasSeenDiscountPopup:${userId}`;
@@ -156,11 +167,60 @@
 		hasMounted = true;
 	});
 
+	async function handleAppLink(url) {
+		const internalPath = getInternalPathFromAppLink(url);
+		if (!internalPath) return;
+
+		if (isProtectedDeepLink(internalPath) && typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem(PENDING_DEEP_LINK_KEY, internalPath);
+		}
+
+		await goto(resolve(internalPath));
+	}
+
+	async function checkAppUpdate(force = false) {
+		const update = await checkForAppUpdate({ force });
+		if (update) appUpdate = update;
+	}
+
+	async function openAppStore(url) {
+		await Browser.open({ url });
+	}
+
+	onMount(() => {
+		if (!Capacitor.isNativePlatform()) return;
+
+		let appUrlListener;
+		let appStateListener;
+
+		const setupNativeAppFeatures = async () => {
+			appUrlListener = await App.addListener('appUrlOpen', ({ url }) => {
+				void handleAppLink(url);
+			});
+
+			const launchUrl = await App.getLaunchUrl();
+			if (launchUrl?.url) void handleAppLink(launchUrl.url);
+
+			appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
+				if (isActive) void checkAppUpdate(true);
+			});
+
+			void checkAppUpdate();
+		};
+
+		void setupNativeAppFeatures();
+
+		return () => {
+			void appUrlListener?.remove();
+			void appStateListener?.remove();
+		};
+	});
+
 	$effect(() => {
 		if (!hasMounted || isLoading.isLoading) return;
 
 		if (!isAuthenticated.isAuthenticated && !isPublicRoute) {
-			void goto('/auth/login');
+			void goto(resolve('/auth/login'));
 		}
 	});
 
@@ -220,7 +280,7 @@
 				</div>
 				<p class="mb-4 text-gray-600">
 					You can find this code again in your profile under <a
-						href="/profile"
+						href={resolve('/profile')}
 						class="text-amber-600 hover:underline">Coupons</a>
 				</p>
 				<button
@@ -231,6 +291,11 @@
 			</div>
 		</Popup>
 	{/if}
+
+	<AppUpdatePrompt
+		update={appUpdate}
+		onUpdate={openAppStore}
+		onDismiss={() => (appUpdate = null)} />
 </div>
 
 <style>

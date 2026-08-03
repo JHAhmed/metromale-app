@@ -4,7 +4,7 @@
 </script>
 
 <dialog
-	onclick={closeDialog}
+	onclick={(event) => event.target === event.currentTarget && closeDialog()}
 	class="fixed inset-0 z-100 flex h-screen w-screen items-center justify-center bg-black/40 backdrop-blur-sm">
 	<div
 		transition:scale={{ duration: 200, start: 0.5 }}

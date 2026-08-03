@@ -3,8 +3,8 @@
 	"appName": "Metromale",
 	"webDir": "build",
 	"android": {
-		"versionCode": 6,
-		"versionName": "1.2.1"
+		"versionCode": 7,
+		"versionName": "1.2.2"
 	},
 	"server": {
 		"androidScheme": "https",
