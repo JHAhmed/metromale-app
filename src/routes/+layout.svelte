@@ -66,9 +66,11 @@
 	const FCM_PROVIDER_ID = '6a2ce8b90031b8fc38c0';
 	const APNS_PROVIDER_ID = '6a2cef90002b22f92775';
 	let hasMounted = false;
+	// Capacitor's custom iOS scheme can expose the root URL with an empty
+	// pathname, while Android exposes it as '/'. Treat both as the public home route.
+	let currentPath = $derived(page.url.pathname || '/');
 	let isPublicRoute = $derived(
-		publicRoutes.includes(page.url.pathname) ||
-			publicPrefixes.some((p) => page.url.pathname.startsWith(p))
+		publicRoutes.includes(currentPath) || publicPrefixes.some((p) => currentPath.startsWith(p))
 	);
 
 	async function initPush() {
@@ -194,6 +196,14 @@
 		await Browser.open({ url });
 	}
 
+	async function redirectToLogin() {
+		try {
+			await goto(resolve('/auth/login'));
+		} catch (error) {
+			console.error('Unable to redirect to the login page:', error);
+		}
+	}
+
 	onMount(() => {
 		if (!Capacitor.isNativePlatform()) return;
 
@@ -227,7 +237,7 @@
 		if (!hasMounted || isLoading.isLoading) return;
 
 		if (!isAuthenticated.isAuthenticated && !isPublicRoute) {
-			void goto(resolve('/auth/login'));
+			void redirectToLogin();
 		}
 	});
 
@@ -255,11 +265,7 @@
 		<TopNavbar {name} isAuth={isAuthenticated.isAuthenticated} />
 	{/key}
 
-	{#if isLoading.isLoading && !isPublicRoute}
-		<Modal text="Loading your account..." description="" />
-	{:else if !isAuthenticated.isAuthenticated && !isPublicRoute}
-		<Modal />
-	{:else}
+	{#if isPublicRoute || isAuthenticated.isAuthenticated}
 		{#key page.url.pathname}
 			<div
 				in:fade={{ duration: 150, delay: 150 }}
@@ -268,9 +274,11 @@
 				{@render children?.()}
 			</div>
 		{/key}
+	{:else if isLoading.isLoading}
+		<Modal text="Loading your account..." description="" />
 	{/if}
 
-	{#if page.url.pathname !== '/auth/login'}
+	{#if currentPath !== '/auth/login'}
 		<Navbar />
 	{/if}
 
