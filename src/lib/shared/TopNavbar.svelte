@@ -3,68 +3,74 @@
 	import { page } from '$app/state';
 	import { fade, slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { Query, tablesDB } from '$lib/appwrite';
 	import { user } from '$lib/stores/auth.svelte';
 	import { getUserAppointments } from '$lib/tables/appointments';
+	import { getPublishedAlerts } from '$lib/tables/posts';
+	import AlertPost from '$lib/components/AlertPost.svelte';
 
 	let { name = 'User', isAuth = false } = $props();
 
-	// let notifications = $state([]);
 	let appointmentCount = $state(0);
 	let orderCount = $state(0);
+	let alerts = $state([]);
+	let selectedAlert = $state(null);
 	let menuOpen = $state(false);
 	let hasCoupon = $state(false);
 	let couponCode = $state('');
-	// const hiddenPaths = ['/auth/login'];
+	let hasNotifications = $derived(hasCoupon || appointmentCount + orderCount + alerts.length > 0);
 
 	onMount(async () => {
-		if (!isAuth) {
-			return;
+		try {
+			const publishedAlerts = await getPublishedAlerts();
+			alerts = publishedAlerts.rows ?? [];
+		} catch (error) {
+			console.error('Error loading published alerts:', error);
 		}
 
-		const appointments = await tablesDB.listRows({
-			databaseId: 'metromale',
-			tableId: 'appointments',
-			queries: [
-				Query.equal('status', ['pending', 'confirmed']),
-				Query.equal('userId', user?.user.$id)
-			]
-		});
+		const userId = user.user?.$id;
+		if (!isAuth || !userId) return;
 
-		appointmentCount = appointments.total;
-
-		const orders = await tablesDB.listRows({
-			databaseId: 'metromale',
-			tableId: 'shop_orders',
-			queries: [
-				Query.equal('status', ['pending', 'shipped']),
-				Query.equal('userId', user?.user.$id)
-			]
-		});
-
-		orderCount = orders.total;
-
-		// Check if user has a coupon (no appointments yet)
 		try {
-			const allAppointments = await getUserAppointments(user?.user?.$id);
-			if (allAppointments && allAppointments.total === 0) {
+			const [appointments, orders, allAppointments] = await Promise.all([
+				tablesDB.listRows({
+					databaseId: 'metromale',
+					tableId: 'appointments',
+					queries: [Query.equal('status', ['pending', 'confirmed']), Query.equal('userId', userId)]
+				}),
+				tablesDB.listRows({
+					databaseId: 'metromale',
+					tableId: 'shop_orders',
+					queries: [Query.equal('status', ['pending', 'shipped']), Query.equal('userId', userId)]
+				}),
+				getUserAppointments(userId)
+			]);
+
+			appointmentCount = appointments.total;
+			orderCount = orders.total;
+
+			if (allAppointments.total === 0) {
 				hasCoupon = true;
-				couponCode = user?.user?.$id.slice(-5).toUpperCase();
+				couponCode = userId.slice(-5).toUpperCase();
 			}
 		} catch (e) {
-			console.error('Error checking coupon eligibility:', e);
+			console.error('Error loading notification center:', e);
 		}
-
-		// notifications = [...appointments.rows, ...orders.rows];
 	});
 
 	async function handleLogin() {
-		goto('/auth/login');
+		goto(resolve('/auth/login'));
 	}
 
 	function openNotifications() {
 		menuOpen = !menuOpen;
+	}
+
+	function openAlert(alert) {
+		selectedAlert = alert;
+		menuOpen = false;
 	}
 </script>
 
@@ -80,8 +86,10 @@
 			onclick={openNotifications}
 			class="relative flex h-fit w-fit flex-1 flex-col items-center justify-center rounded-full bg-gray-100 p-3 text-center text-black transition-transform active:scale-95 active:opacity-80">
 			<Icon icon="ph:bell-simple" class="h-6 w-6" />
-			{#if hasCoupon || appointmentCount + orderCount > 0}
-				<span class="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-amber-500 ring-2 ring-white"></span>
+			{#if hasNotifications}
+				<span
+					class="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-amber-500 ring-2 ring-white"
+				></span>
 			{/if}
 		</button>
 
@@ -109,17 +117,39 @@
 	<div
 		transition:slide={{ duration: 300, axis: 'y' }}
 		class="fixed inset-x-0 top-20 z-60 mx-4 max-w-7xl rounded-3xl bg-white p-6 shadow-lg sm:mx-6 lg:mx-8">
-		{#if hasCoupon || appointmentCount + orderCount > 0}
+		{#if hasNotifications}
 			<div class="flex w-full flex-col items-center justify-start space-y-2">
+				{#each alerts as alert (alert.$id)}
+					<button
+						type="button"
+						onclick={() => openAlert(alert)}
+						class="flex w-full items-center gap-3 rounded-xl bg-orange-50 px-4 py-4 text-left transition-transform active:scale-[0.98]">
+						<div class="rounded-xl bg-orange-100 p-2 text-primary">
+							<Icon icon="ph:megaphone-simple" class="size-5" />
+						</div>
+						<div class="min-w-0 flex-1">
+							<p class="truncate text-sm font-semibold text-orange-700">{alert.title}</p>
+							{#if alert.description}
+								<p class="mt-0.5 line-clamp-2 text-xs text-gray-500">{alert.description}</p>
+							{/if}
+						</div>
+						<Icon icon="ph:caret-right" class="size-4 shrink-0 text-orange-400" />
+					</button>
+				{/each}
 				{#if hasCoupon}
-					<a href="/profile" onclick={() => (menuOpen = false)}
+					<a
+						href={resolve('/profile')}
+						onclick={() => (menuOpen = false)}
 						class="flex w-full items-center gap-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-4 transition-transform active:scale-[0.98]">
 						<div class="rounded-xl bg-amber-100 p-2 text-amber-600">
 							<Icon icon="ph:gift" class="size-5" />
 						</div>
 						<div class="flex-1">
 							<p class="text-sm font-semibold text-amber-700">You have a 10% off coupon!</p>
-							<p class="text-xs text-gray-500">Code: <span class="font-bold tracking-wider text-amber-600">{couponCode}</span> · Tap to view in profile</p>
+							<p class="text-xs text-gray-500">
+								Code: <span class="font-bold tracking-wider text-amber-600">{couponCode}</span> · Tap
+								to view in profile
+							</p>
 						</div>
 						<Icon icon="ph:caret-right" class="size-4 text-amber-400" />
 					</a>
@@ -144,3 +174,4 @@
 	</div>
 {/if}
 
+<AlertPost post={selectedAlert} onClose={() => (selectedAlert = null)} />

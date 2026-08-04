@@ -9,6 +9,22 @@ let cartPromise = null;
 let productsPromise = null;
 let authRun = 0;
 
+// A WebView request can remain pending when iOS restores an interrupted network
+// connection. Never let that leave the application behind its startup overlay.
+const AUTH_REQUEST_TIMEOUT_MS = 6_000;
+
+function withTimeout(promise, timeoutMs) {
+	let timeoutId;
+
+	const timeout = new Promise((_, reject) => {
+		timeoutId = setTimeout(() => {
+			reject(new Error(`Authentication request timed out after ${timeoutMs / 1000} seconds.`));
+		}, timeoutMs);
+	});
+
+	return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
+
 export function hydrateCart() {
 	if (cartPromise) return cartPromise;
 
@@ -41,7 +57,7 @@ export function initAuth({ force = false } = {}) {
 
 	authPromise = (async () => {
 		try {
-			const appwriteUser = await account.get();
+			const appwriteUser = await withTimeout(account.get(), AUTH_REQUEST_TIMEOUT_MS);
 			if (runId !== authRun) return;
 
 			isAuthenticated.isAuthenticated = !!appwriteUser?.$id;
@@ -50,9 +66,10 @@ export function initAuth({ force = false } = {}) {
 			if (user.user) {
 				void warmProductCatalog();
 			}
-		} catch {
+		} catch (error) {
 			if (runId !== authRun) return;
 
+			console.warn('Unable to restore the Appwrite session:', error);
 			isAuthenticated.isAuthenticated = false;
 			user.user = null;
 		} finally {

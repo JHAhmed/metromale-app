@@ -31,3 +31,5 @@ vite.config.ts.timestamp-*
 *.mobileprovision
 *.certSigningRequest
 *.p12
+
+ios_issue.png

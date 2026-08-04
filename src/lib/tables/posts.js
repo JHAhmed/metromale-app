@@ -30,17 +30,25 @@ export async function getPosts(number) {
 }
 
 export async function getLatestPublishedAlert() {
-	try {
-		const response = await tablesDB.listRows('metromale', 'posts', [
-			Query.equal('type', 'alert'),
-			Query.equal('isPublished', true),
-			Query.orderDesc('$updatedAt'),
-			Query.limit(1)
-		]);
+	const alerts = await getPublishedAlerts(1);
+	return alerts.rows?.[0] ?? null;
+}
 
-		return response.rows?.[0] ?? null;
+export async function getPublishedAlerts(limit) {
+	const queries = [
+		Query.equal('type', 'alert'),
+		Query.equal('isPublished', true),
+		Query.orderDesc('$updatedAt')
+	];
+
+	if (Number.isInteger(limit) && limit > 0) {
+		queries.push(Query.limit(limit));
+	}
+
+	try {
+		return await tablesDB.listRows('metromale', 'posts', queries);
 	} catch (error) {
-		console.error('Error fetching the latest published alert:', error);
-		return null;
+		console.error('Error fetching published alerts:', error);
+		return { rows: [], total: 0 };
 	}
 }
