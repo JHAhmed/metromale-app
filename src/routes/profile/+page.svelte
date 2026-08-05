@@ -7,6 +7,7 @@
 	import { account } from '$lib/appwrite';
 	import { toast, Toaster } from 'svelte-sonner';
 	import Popup from '$lib/components/ui/Popup.svelte';
+	import { goto } from '$app/navigation';
 
 	const quickLinks = [
 		{
@@ -363,7 +364,9 @@
 	{/await}
 
 	<div class="grid gap-4 sm:grid-cols-2">
-		<div class="rounded-3xl bg-white p-5 shadow-lg/1">
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<div onclick={() => {goto('/appointments')}} class="rounded-3xl bg-white p-5 shadow-lg/1">
 			<div class="flex items-center justify-between">
 				<div>
 					<p class="text-sm font-medium text-gray-500">Appointments</p>
@@ -400,7 +403,9 @@
 			{/await}
 		</div>
 
-		<div class="rounded-3xl bg-white p-5 shadow-lg/1">
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<div onclick={() => {goto('/shop/orders')}} class="rounded-3xl bg-white p-5 shadow-lg/1">
 			<div class="flex items-center justify-between">
 				<div>
 					<p class="text-sm font-medium text-gray-500">Orders</p>

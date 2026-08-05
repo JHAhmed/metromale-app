@@ -1,12 +1,9 @@
 <script>
 	import Icon from '@iconify/svelte';
-	import { onMount } from 'svelte';
 	import { getFile } from '$lib/utils/getFile.js';
 
 	let { post, onClose = () => {} } = $props();
 	let thumbnailUrl = $state('');
-
-	const thumbnail = $derived(post?.thumbnail ?? post?.thumbnailUrl);
 
 	function openYoutube() {
 		if (post?.youtubeUrl && typeof window !== 'undefined') {
@@ -14,24 +11,24 @@
 		}
 	}
 
-	onMount(async () => {
-		if (!thumbnail) return;
+	$effect(() => {
+		const thumbnailId = post?.thumbnail;
+		let cancelled = false;
 
-		const thumbnailReference =
-			typeof thumbnail === 'string' ? thumbnail : thumbnail.$id || thumbnail.fileId;
+		thumbnailUrl = '';
+		if (!thumbnailId) return;
 
-		if (!thumbnailReference) return;
+		getFile(thumbnailId)
+			.then((url) => {
+				if (!cancelled) thumbnailUrl = url.toString();
+			})
+			.catch((error) => {
+				if (!cancelled) console.error('Error loading alert thumbnail:', error);
+			});
 
-		if (/^https?:\/\//i.test(thumbnailReference)) {
-			thumbnailUrl = thumbnailReference;
-			return;
-		}
-
-		try {
-			thumbnailUrl = await getFile(thumbnailReference);
-		} catch (error) {
-			console.error('Error loading alert thumbnail:', error);
-		}
+		return () => {
+			cancelled = true;
+		};
 	});
 </script>
 
@@ -57,34 +54,36 @@
 				<img
 					src={thumbnailUrl}
 					alt=""
-					class="max-h-64 w-full object-cover"
+					class="w-full object-cover"
 					onerror={() => (thumbnailUrl = '')} />
 			{/if}
 
-			<div class:pt-12={!thumbnailUrl} class="space-y-4 p-6">
-				<div class="flex items-center gap-2 text-sm font-medium text-primary">
-					<Icon icon="ph:megaphone-simple" class="size-5" />
-					<span>Important update</span>
+			<!-- <div class="flex items-center gap-2 text-sm font-medium text-primary">
+				<Icon icon="ph:megaphone-simple" class="size-5" />
+				<span>Important update</span>
+				</div> -->
+
+			{#if post.title && post.description}
+				<div class="space-y-2 p-6">
+					<h2 id="alert-post-title" class="pr-8 text-2xl leading-tight font-bold text-gray-900">
+						{post.title}
+					</h2>
+
+					{#if post.description}
+						<p class="leading-relaxed whitespace-pre-line text-gray-600">{post.description}</p>
+					{/if}
+
+					{#if post.youtubeUrl}
+						<button
+							type="button"
+							onclick={openYoutube}
+							class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 font-semibold text-white transition-colors hover:bg-primary/90">
+							<Icon icon="ph:youtube-logo" class="size-5" />
+							Watch Now
+						</button>
+					{/if}
 				</div>
-
-				<h2 id="alert-post-title" class="pr-8 text-2xl leading-tight font-bold text-gray-900">
-					{post.title}
-				</h2>
-
-				{#if post.description}
-					<p class="leading-relaxed whitespace-pre-line text-gray-600">{post.description}</p>
-				{/if}
-
-				{#if post.youtubeUrl}
-					<button
-						type="button"
-						onclick={openYoutube}
-						class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 font-semibold text-white transition-colors hover:bg-primary/90">
-						<Icon icon="ph:youtube-logo" class="size-5" />
-						Watch Now
-					</button>
-				{/if}
-			</div>
+			{/if}
 		</div>
 	</div>
 {/if}

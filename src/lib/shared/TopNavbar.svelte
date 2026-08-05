@@ -9,6 +9,7 @@
 	import { user } from '$lib/stores/auth.svelte';
 	import { getUserAppointments } from '$lib/tables/appointments';
 	import { getPublishedAlerts } from '$lib/tables/posts';
+	import { isUpcomingAppointment } from '$lib/utils/appointmentStatus.js';
 	import AlertPost from '$lib/components/AlertPost.svelte';
 
 	let { name = 'User', isAuth = false } = $props();
@@ -48,7 +49,7 @@
 				getUserAppointments(userId)
 			]);
 
-			appointmentCount = appointments.total;
+			appointmentCount = (appointments.rows ?? []).filter(isUpcomingAppointment).length;
 			orderCount = orders.total;
 
 			if (allAppointments.total === 0) {

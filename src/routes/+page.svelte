@@ -6,14 +6,26 @@
 	import { iconMap } from '$lib';
 	import { getLatestUserAppointment } from '$lib/tables/appointments';
 	import { getUserShopOrders } from '$lib/tables/shopOrders';
+	import { isUpcomingAppointment } from '$lib/utils/appointmentStatus.js';
 
 	function formatDateTime(dateString, options) {
 		const date = new Date(dateString);
 		return new Intl.DateTimeFormat('en-GB', options).format(date);
 	}
 
+	function handleAppointmentClick(appointment) {
+		if (appointment && isUpcomingAppointment(appointment)) {
+			goto(`/appointments/${appointment.$id}`);
+		} else if (user?.user?.$id) {
+			goto('/appointments');
+		} else {
+			goto('/login');
+		}
+	}
+
 	function navigate() {
-		const url = 'https://api.whatsapp.com/send?phone=917358011181&text=Hi%20I%20have%20an%20inquiry%20about%20Metromale!';
+		const url =
+			'https://api.whatsapp.com/send?phone=917358011181&text=Hi%20I%20have%20an%20inquiry%20about%20Metromale!';
 		window.open(url, '_blank');
 	}
 </script>
@@ -35,16 +47,21 @@
 			</div>
 		</div>
 	{:then appointment}
+		{@const upcomingAppointment = isUpcomingAppointment(appointment) ? appointment : null}
 		<div
 			class="relative flex flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-lg/1">
-			<div class="flex h-32 w-full flex-col items-center justify-center space-y-4">
-				{#if appointment}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				onclick={() => handleAppointmentClick(appointment)}
+				class="flex h-32 w-full flex-col items-center justify-center space-y-4 active:scale-99">
+				{#if upcomingAppointment}
 					<h2 class="text-center font-medium text-gray-700">Upcoming Appointment</h2>
 					<div class="relative flex items-center justify-center bg-white p-2">
 						<div class="flex items-start justify-between">
 							<div>
-								<p class="text-xl font-semibold text-gray-900">{appointment.patientName}</p>
-								<p class="text-sm text-gray-600">{appointment.branch}</p>
+								<p class="text-xl font-semibold text-gray-900">{upcomingAppointment.patientName}</p>
+								<p class="text-sm text-gray-600">{upcomingAppointment.branch}</p>
 							</div>
 						</div>
 
@@ -54,7 +71,7 @@
 							<div class="flex items-center gap-3 text-gray-700">
 								<!-- <Icon icon="ph:calendar-blank" class="h-5 w-5 text-gray-500" /> -->
 								<span class="font-medium">
-									{formatDateTime(appointment.appointmentDatetime, { dateStyle: 'full' })}
+									{formatDateTime(upcomingAppointment.appointmentDatetime, { dateStyle: 'full' })}
 								</span>
 							</div>
 						</div>
@@ -87,7 +104,7 @@
 		{#await getUserShopOrders(user?.user?.$id)}
 			<div class="w-full rounded-3xl bg-white p-6 shadow-lg/1">
 				<div class="flex h-32 w-full flex-col items-center justify-center space-y-6">
-					<Icon icon="ph:package" class="size-8 text-gray-400 animate-pulse" />
+					<Icon icon="ph:package" class="size-8 animate-pulse text-gray-400" />
 					<h2 class="text-center font-medium text-gray-700">Loading orders...</h2>
 				</div>
 			</div>
@@ -101,8 +118,10 @@
 						<Icon icon="ph:package" class="size-8 text-amber-500" />
 						<div class="text-center">
 							<h2 class="font-medium text-gray-700">Latest Order</h2>
-							<p class="text-sm text-gray-500">{latestOrder.itemCount} item{latestOrder.itemCount !== 1 ? 's' : ''} · ₹{latestOrder.totalAmount?.toLocaleString()}</p>
-							<p class="mt-1 text-xs capitalize text-gray-400">{latestOrder.status}</p>
+							<p class="text-sm text-gray-500">
+								{latestOrder.itemCount} item{latestOrder.itemCount !== 1 ? 's' : ''} · ₹{latestOrder.totalAmount?.toLocaleString()}
+							</p>
+							<p class="mt-1 text-xs text-gray-400 capitalize">{latestOrder.status}</p>
 						</div>
 					{:else}
 						<Icon icon="ph:package" class="size-8 text-gray-400" />
@@ -127,7 +146,7 @@
 			<button
 				onclick={() => goto('/appointments/new')}
 				class="w-full rounded-3xl bg-red-400 p-4 shadow-lg/1 transition-transform active:scale-99 active:bg-red-500">
-				<div class="flex h-16 w-full  items-center justify-center space-x-3">
+				<div class="flex h-16 w-full items-center justify-center space-x-3">
 					<Icon icon="ph:asclepius" class="size-6 text-white" />
 					<h2 class="text-center font-medium text-white">Book Appointment</h2>
 				</div>
@@ -135,7 +154,7 @@
 			<button
 				onclick={() => navigate()}
 				class="w-full rounded-3xl bg-green-500 p-4 shadow-lg/1 transition-transform active:scale-99 active:bg-green-600">
-				<div class="flex h-16 w-full  items-center justify-center space-x-3">
+				<div class="flex h-16 w-full items-center justify-center space-x-3">
 					<Icon icon="simple-icons:whatsapp" class="size-6 text-white" />
 					<h2 class="text-center font-medium text-white">WhatsApp</h2>
 				</div>
@@ -170,8 +189,7 @@
 			</a>
 		{/each}
 	{:catch error}
-		<div
-			class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
+		<div class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.02]">
 			<div class="flex items-center space-x-4">
 				<div class="flex flex-col">
 					<p class="text-xs text-red-700">Error loading content: {error.message}</p>

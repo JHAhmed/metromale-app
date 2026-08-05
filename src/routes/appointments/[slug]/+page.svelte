@@ -3,6 +3,7 @@
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { isExpiredPendingAppointment } from '$lib/utils/appointmentStatus.js';
 
 	let { data } = $props();
 
@@ -98,6 +99,12 @@
 							]}">
 							{appointment.status}
 						</span>
+						{#if isExpiredPendingAppointment(appointment)}
+							<span
+								class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+								Expired
+							</span>
+						{/if}
 					</div>
 				</div>
 			</div>

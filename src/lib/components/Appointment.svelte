@@ -1,5 +1,6 @@
 <script>
 	import Icon from '@iconify/svelte';
+	import { isExpiredPendingAppointment } from '$lib/utils/appointmentStatus.js';
 
 	let { appointment } = $props();
 
@@ -24,16 +25,14 @@
 	class="block rounded-3xl bg-white p-6 shadow-lg/1 transition-transform hover:scale-[1.01] active:scale-99 active:shadow-lg/2">
 	<div class="flex items-start justify-between">
 		<div class="flex-1 space-y-3">
-
 			<div class="flex items-center space-x-3">
 				<Icon icon="ph:user" class="size-5 text-gray-500" />
-				<span class="text-gray-800 font-semibold">{appointment.patientName}</span>
+				<span class="font-semibold text-gray-800">{appointment.patientName}</span>
 			</div>
 
 			<div class="flex items-center space-x-3">
 				<Icon icon="ph:calendar" class="size-5 text-gray-500" />
-				<span class="text-gray-700"
-					>{formatDate(appointment.appointmentDatetime)}</span>
+				<span class="text-gray-700">{formatDate(appointment.appointmentDatetime)}</span>
 			</div>
 			<div class="flex items-center space-x-3">
 				<Icon icon="ph:clock" class="size-5 text-gray-500" />
@@ -51,12 +50,20 @@
 			{/if}
 		</div>
 		<div class="ml-4 flex flex-col items-end space-y-2">
-			<span
-				class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {statusColors[
-					appointment.status
-				]}">
-				{appointment.status}
-			</span>
+			<div class="flex items-center gap-2">
+				<span
+					class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {statusColors[
+						appointment.status
+					]}">
+					{appointment.status}
+				</span>
+				{#if isExpiredPendingAppointment(appointment)}
+					<span
+						class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+						Expired
+					</span>
+				{/if}
+			</div>
 			<Icon icon="ph:arrow-right" class="size-5 text-gray-400" />
 		</div>
 	</div>
